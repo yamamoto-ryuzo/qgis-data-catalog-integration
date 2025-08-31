@@ -3,7 +3,7 @@
 
 このドキュメントは、QGISと多様なデータカタログの統合に関する将来の理想像・計画・アイデアを具体的にまとめたものです。現状の実装や進捗ではなく、「こうなってほしい」「こうしたい」という未来志向の内容です。
 
-	This document outlines the future vision, plans, and ideas for integrating QGIS with various data catalogs. It is forward-looking and describes what we want to achieve, not the current implementation or progress.
+This document outlines the future vision, plans, and ideas for integrating QGIS with various data catalogs. It is forward-looking and describes what we want to achieve, not the current implementation or progress.
 
 
 ## 概要 / Overview
@@ -11,12 +11,12 @@
 
 QGISから多様なデータカタログ（CKAN, DKAN, DataHub, Socrata, OpenDataSoft, GeoNetwork, Dataverse, Metacat, Piveau, SMB共有など）を横断的に検索・参照し、地理空間データやオープンデータセットをQGISプロジェクトへシームレスに統合できる世界を目指します。
 
-	We aim to create an environment where users can seamlessly search and access a wide variety of data catalogs (CKAN, DKAN, DataHub, Socrata, OpenDataSoft, GeoNetwork, Dataverse, Metacat, Piveau, SMB shares, etc.) from QGIS, and integrate geospatial and open datasets directly into QGIS projects.
+We aim to create an environment where users can seamlessly search and access a wide variety of data catalogs (CKAN, DKAN, DataHub, Socrata, OpenDataSoft, GeoNetwork, Dataverse, Metacat, Piveau, SMB shares, etc.) from QGIS, and integrate geospatial and open datasets directly into QGIS projects.
 
 
 将来的には、データの発見・取得・活用・管理までを一気通貫でサポートし、GIS分析の生産性とデータ活用の幅を大きく広げることが目標です。
 
-	Ultimately, the goal is to support the entire workflow from data discovery and acquisition to utilization and management, greatly enhancing the productivity of GIS analysis and the breadth of data use.
+Ultimately, the goal is to support the entire workflow from data discovery and acquisition to utilization and management, greatly enhancing the productivity of GIS analysis and the breadth of data use.
 
 
 ## 目指す方向性 / Future Directions
@@ -198,3 +198,4 @@ MIT License (or another appropriate OSS license to be specified)
 > ※このファイルは将来の構想・計画を記載するためのものです。現状の進捗や実装内容は含まれていません。
 
 > This file describes future plans and ideas. It does not include current progress or implementation details.
+
