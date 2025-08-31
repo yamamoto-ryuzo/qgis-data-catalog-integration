@@ -1,0 +1,173 @@
+
+
+# CKAN-Browser プラグイン（yamamoto版）
+# CKAN-Browser Plugin (yamamoto version)
+
+
+# 開発方針 / Development Policy
+東京オープンデータハッカソンへの参加をきっかけに、東京オープンデータをQGISで検索・変換・取り込み・装飾まで簡単にできるよう機能強化を行います。
+https://odhackathon.metro.tokyo.lg.jp/
+
+Inspired by participation in the Tokyo Open Data Hackathon (Visualization Division), this version aims to make it easier to search, convert, import, and style Tokyo open data in QGIS through enhanced features.
+https://odhackathon.metro.tokyo.lg.jp/
+
+　【参考】  
+・DATA GO.JP:https://www.data.go.jp/data/api/3  
+・G空間情報センター: https://www.geospatial.jp/ckan/api/3  
+・東京都オープンデータカタログサイト：https://catalog.data.metro.tokyo.lg.jp/api/3  
+・地質調査総合センターデータカタログ：https://data.gsj.jp/gkan/api/3  
+・姫路市・播磨圏域連携中枢都市圏オープンデータカタログサイト：https://city.himeji.gkan.jp/gkan/api/3  
+・ビッグデータ&オープンデータ・イニシアティブ九州：https://data.bodik.jp/  
+
+## 概要 / Overview
+QGIS用CKAN-Browserプラグインの拡張・修正版です。
+CKANオープンデータポータルからデータセットを検索・取得し、QGIS上で活用できます。
+
+This is an enhanced and modified version of the CKAN-Browser plugin for QGIS.
+You can search and download datasets from CKAN open data portals and use them in QGIS.
+
+
+## 主な追加・修正機能 / Main Added & Improved Features
+- ローカルSQLiteキャッシュ検索時もカテゴリ（グループ）フィルタが有効
+    - Category (group) filter is available even when searching local SQLite cache
+- CSVファイルの区切り文字自動判定（カンマ・セミコロン・タブ・コロン・スペース対応）
+    - Automatic delimiter detection for CSV files (comma, semicolon, tab, colon, space)
+- CSVファイルの文字コード自動判定（UTF-8/CP932）とQGISレイヤ追加時のencoding自動指定
+    - Automatic encoding detection for CSV files (UTF-8/CP932) and auto-setting when adding as QGIS layer
+- CSVに緯度経度カラムがあれば自動でポイントジオメトリ化
+    - Automatic point geometry creation if latitude/longitude columns exist in CSV
+- UIの一部改善
+    - Some UI improvements
+- バージョン・更新履歴は `metadata_yamamoto.txt`, `Changlog_yamamoto.txt` で管理
+    - Version and changelog are managed in `metadata_yamamoto.txt` and `Changlog_yamamoto.txt`
+
+
+## 使い方 / How to Use
+1. QGISで本プラグインを有効化
+    - Enable this plugin in QGIS
+2. CKANサーバを選択し、検索・カテゴリ・データ形式で絞り込み
+    - Select a CKAN server, filter by search, category, and data format
+3. データセットを選択し、リソースをダウンロード・地図に追加
+    - Select a dataset, download resources, and add them to the map
+4. CSVの場合は自動で区切り文字・文字コード・ジオメトリ判定
+    - For CSV, delimiter, encoding, and geometry are detected automatically
+
+
+## ローカル (LOCAL) フォルダの仕様 / LOCAL folder support
+
+このプラグインはローカルフォルダ内の CKAN 互換 JSON を CKAN と同様に扱えます。ローカルフォルダを手元のデータセットとして登録すると、SQLite キャッシュを生成して通常の検索・ダウンロード・取り込みフローで利用できます。
+
+- 登録方法:
+    - 「データプロバイダ」ダイアログの手動 URL 欄にローカルパスを入力して接続を追加します。UI 上には手入力のほか、QLineEdit 内の「Browse folder...」アクションと、入力欄横の「ローカルフォルダ選択」ボタンのいずれでもフォルダ選択できます。
+    - 入力例:
+        - Windows: `C:\data\local_ckan`、`file:///C:/data/local_ckan`、`local://C:/data/local_ckan`
+        - POSIX: `/home/user/local_ckan`、`file:///home/user/local_ckan`、`local:///home/user/local_ckan`
+    - 名前をつけて保存すると `custom_servers` に `{"url": "<path>", "type": "LOCAL"}` として保存されます。
+
+- サポートされるローカル指定:
+    - 直接のディレクトリパス
+    - `file://` スキーム
+    - `local://` スキーム
+
+- 期待するフォルダ構成（いずれか）:
+    1. 単一ファイル方式
+         - `<local_folder>/packages.json` — CKAN の package 配列（複数パッケージの配列）
+         - `<local_folder>/groups.json` — （任意）グループ（カテゴリ）配列
+    2. ファイル分割方式
+         - `<local_folder>/packages/` ディレクトリ配下に各パッケージを表す個別の `.json` ファイル
+         - `<local_folder>/groups.json` — （任意）グループ（カテゴリ）配列
+
+- JSON の想定スキーマ:
+    - `package` オブジェクトは CKAN の package と互換であること（少なくとも `id`, `title`/`name`, `resources` 配列を含むことが望ましい）。
+    - `resources` 配列の各要素は `id`, `name`/`title`, `format`, `url` 等のフィールドを持つことが望ましい。
+
+- 自動生成・空フォルダ時の挙動:
+    - `packages.json` が存在しない場合、プラグインは `packages/` 以下やルートのデータファイルから自動で `packages.json`（と `groups.json`）を生成し、生成したファイルはフォルダ内に保存されます（再取得時に上書きされることがあります）。
+    - 自動生成でもデータが見つからない（完全に空のフォルダ）の場合は、最小の空配列を入れた `packages.json` を作成し、空の SQLite キャッシュ DB を作成します。このときユーザには情報ダイアログが表示されます（例: 「フォルダは空でした。空の索引を作成しました: <folder>」）。
+    - テスト接続では、ローカルフォルダは存在するかどうかのみで成功とみなします（JSON の有無は不要です）。
+
+- SQLite キャッシュと配置:
+    - 通常はプラグイン設定の `cache_dir` 以下に DB ファイルが作成されます（設定が無い場合は Downloads/CKAN-Browser 等にフォールバックします）。
+    - 実装上はローカルソースでもキャッシュ DB は `cache_dir` に作られるようになっており、プラグインはローカルフォルダ内に DB を作成しない設計です。
+
+- ローカル検索の挙動:
+    - ローカルフォルダ指定の場合、まず `packages.json` を優先読み込みします。存在しない場合は自動生成を試み、その後キャッシュを生成して通常の検索・フィルタが利用可能になります。
+
+- 注意事項:
+    - ローカル JSON は CKAN の形式に準拠していることが望ましい。形式が異なる場合、期待通りに読み込めないことがあります。
+    - 自動生成の際は代表的なデータ拡張子（`.csv`, `.geojson`, `.json`, `.gpkg`, `.kml`, `.kmz`, `.zip`, `.tif`, `.tiff`, `.shp`）を検出して package を作成します。必要に応じて拡張子を追加してください。
+
+- 最小の `packages.json` 例:
+
+```json
+[{
+    "id": "pkg-001",
+    "title": "sample-data",
+    "resources": [
+        {
+            "id": "res-001",
+            "name": "sample-csv",
+            "format": "csv",
+            "url": "https://example.com/data/sample.csv"
+        }
+    ]
+}]
+```
+
+この仕様に合わせたローカルデータを用意すれば、CKAN サーバと同様の操作でデータを検索・取り込みできます。
+
+
+## 注意事項 / Notes
+- QGIS 3.x/4.x対応
+    - Supports QGIS 3.x/4.x
+- 旧バージョンとの互換性に注意
+    - Be careful about compatibility with older versions
+- 詳細なバージョン履歴は `Changlog_yamamoto.txt` を参照
+    - See `Changlog_yamamoto.txt` for detailed version history
+
+
+## 保存ルール / Save rules
+
+ダウンロードしたデータはプラグインのキャッシュディレクトリ配下に保存されます。ディレクトリ構成は可読性と一意性の両立を意図して次のルールに従います。
+
+- 全体構成:
+    - <cache_dir>/<safe_host>_<hash>/<safe_package>_<package_id>/<safe_resource>_<resource_id>/<file>
+        - `cache_dir` はプラグイン設定(`ckan_browser/cache_dir`)で指定されたディレクトリ。未設定時の既定値は `~/.ckan_browser_cache`（キャッシュDB作成処理では環境により `Downloads/CKAN-Browser` にフォールバックする場合があります）。
+        - `safe_host` は CKAN API URL のホスト部分（例: `catalog.data.metro.tokyo.lg.jp`）をファイル名に安全化した文字列。
+        - `hash` はサーバーURL全体の SHA1 ハッシュの先頭8文字で、同一ホスト上でパスやポートが異なる複数インスタンスを区別するために付与されます。
+        - `safe_package` はパッケージの `title`（無ければ `name`）を safe 化した文字列。
+        - `package_id` は CKAN の `package['id']`（通常 UUID）で一意性を担保します。
+        - `safe_resource` はリソースの `name`（無ければ `title`）を safe 化した文字列。
+        - `resource_id` は CKAN の `resource['id']`（通常 UUID）。
+        - `<file>` はリソースの URL から取得したファイル名（basename）。必要に応じてファイル名の安全化が行われます。
+
+- safe 化について:
+    - `util.safe_filename()` による正規化を行い、Unicode 正規化、禁止文字の置換、連続アンダースコアの縮約、長さ制限等を適用します。
+
+- 例:
+    - サーバー `https://catalog.data.metro.tokyo.lg.jp/api/3/`、パッケージ `人口統計 2019`（id=`42b6...`）、リソース `population-csv`（id=`d5ea...`）で CSV を取得すると:
+        - `~/.ckan_browser_cache/catalog.data.metro.tokyo.lg.jp_1a2b3c4d/人口統計_42b6.../population-csv_d5ea.../population.csv`
+
+このルールにより、同じホスト内の複数インスタンスや同名パッケージ・リソースの衝突を避けつつ、人間にも判別しやすいフォルダ構成を実現しています。
+
+
+## 主な改修PYファイル / Main Modified Python Files
+- `ckan_browser_dialog.py`（UI・検索・カテゴリ・リソース処理）
+    - UI, search, category, resource handling
+- `util.py`（CSV自動判定・レイヤ追加・各種ユーティリティ）
+    - CSV auto-detection, layer addition, utilities
+
+
+## バージョン・更新履歴 / Version & Changelog
+- バージョン情報は `metadata_yamamoto.txt` を参照
+    - See `metadata_yamamoto.txt` for version info
+- 更新履歴は `Changlog_yamamoto.txt` を参照
+    - See `Changlog_yamamoto.txt` for changelog
+
+
+## 連絡先 / Contact
+- GitHub: [yamamoto-ryuzo](https://github.com/yamamoto-ryuzo)
+
+
+
+
