@@ -1,7 +1,11 @@
 
 
-# CKAN-Browser プラグイン（yamamoto版）
-# CKAN-Browser Plugin (yamamoto version)
+# QGIS Data Catalog Integration（Catalog Integration）
+
+本プラグイン「QGIS Data Catalog Integration（Catalog Integration）」は、オリジナルの「CKAN-Browser」プラグインをベースに、機能拡張・改良を加えたものです。CKAN-Browser の思想と実装を継承しつつ、より多様なデータカタログやQGISとの統合を目指しています。
+
+This plugin, "QGIS Data Catalog Integration (Catalog Integration)", is based on the original "CKAN-Browser" plugin, with enhanced and extended features. It inherits the philosophy and implementation of CKAN-Browser, aiming for broader data catalog integration and deeper QGIS integration.
+# QGIS Data Catalog Integration (Catalog Integration)
 
 
 # 開発方針 / Development Policy
@@ -11,7 +15,7 @@ https://odhackathon.metro.tokyo.lg.jp/
 Inspired by participation in the Tokyo Open Data Hackathon (Visualization Division), this version aims to make it easier to search, convert, import, and style Tokyo open data in QGIS through enhanced features.
 https://odhackathon.metro.tokyo.lg.jp/
 
-　【参考】  
+　【参考：CKAN】  
 ・DATA GO.JP:https://www.data.go.jp/data/api/3  
 ・G空間情報センター: https://www.geospatial.jp/ckan/api/3  
 ・東京都オープンデータカタログサイト：https://catalog.data.metro.tokyo.lg.jp/api/3  
@@ -20,11 +24,12 @@ https://odhackathon.metro.tokyo.lg.jp/
 ・ビッグデータ&オープンデータ・イニシアティブ九州：https://data.bodik.jp/  
 
 ## 概要 / Overview
-QGIS用CKAN-Browserプラグインの拡張・修正版です。
-CKANオープンデータポータルからデータセットを検索・取得し、QGIS上で活用できます。
 
-This is an enhanced and modified version of the CKAN-Browser plugin for QGIS.
-You can search and download datasets from CKAN open data portals and use them in QGIS.
+QGIS用データカタログ統合プラグイン（QGIS Data Catalog Integration / Catalog Integration）の拡張・修正版です。
+CKAN等のオープンデータポータルからデータセットを検索・取得し、QGIS上で活用できます。
+
+This is an enhanced and modified version of the QGIS Data Catalog Integration (Catalog Integration) plugin for QGIS.
+You can search and download datasets from CKAN and other open data portals and use them in QGIS.
 
 
 ## 主な追加・修正機能 / Main Added & Improved Features
@@ -87,7 +92,7 @@ You can search and download datasets from CKAN open data portals and use them in
     - テスト接続では、ローカルフォルダは存在するかどうかのみで成功とみなします（JSON の有無は不要です）。
 
 - SQLite キャッシュと配置:
-    - 通常はプラグイン設定の `cache_dir` 以下に DB ファイルが作成されます（設定が無い場合は Downloads/CKAN-Browser 等にフォールバックします）。
+    - 通常はプラグイン設定の `cache_dir` 以下に DB ファイルが作成されます（設定が無い場合は Downloads/Catalog Integration 等にフォールバックします）。
     - 実装上はローカルソースでもキャッシュ DB は `cache_dir` に作られるようになっており、プラグインはローカルフォルダ内に DB を作成しない設計です。
 
 - ローカル検索の挙動:
@@ -132,7 +137,7 @@ You can search and download datasets from CKAN open data portals and use them in
 
 - 全体構成:
     - <cache_dir>/<safe_host>_<hash>/<safe_package>_<package_id>/<safe_resource>_<resource_id>/<file>
-        - `cache_dir` はプラグイン設定(`ckan_browser/cache_dir`)で指定されたディレクトリ。未設定時の既定値は `~/.ckan_browser_cache`（キャッシュDB作成処理では環境により `Downloads/CKAN-Browser` にフォールバックする場合があります）。
+    - `cache_dir` はプラグイン設定(`ckan_browser/cache_dir`)で指定されたディレクトリ。未設定時の既定値は `~/.ckan_browser_cache`（キャッシュDB作成処理では環境により `Downloads/Catalog Integration` にフォールバックする場合があります）。
         - `safe_host` は CKAN API URL のホスト部分（例: `catalog.data.metro.tokyo.lg.jp`）をファイル名に安全化した文字列。
         - `hash` はサーバーURL全体の SHA1 ハッシュの先頭8文字で、同一ホスト上でパスやポートが異なる複数インスタンスを区別するために付与されます。
         - `safe_package` はパッケージの `title`（無ければ `name`）を safe 化した文字列。

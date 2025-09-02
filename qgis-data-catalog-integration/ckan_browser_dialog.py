@@ -96,7 +96,7 @@ class DataFetchThread(QThread):
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- CKAN-Browser
+ QGIS Data Catalog Integration / Catalog Integration
                                  A QGIS plugin
  Download and display CKAN enabled Open Data Portals
                               -------------------
@@ -341,7 +341,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                 downloads = os.path.expanduser('~/Downloads')
             else:
                 downloads = os.path.expanduser('~/Downloads')
-            cache_dir = os.path.join(downloads, 'CKAN-Browser')
+            cache_dir = os.path.join(downloads, 'Catalog Integration')
             if not os.path.isdir(cache_dir):
                 os.makedirs(cache_dir, exist_ok=True)
         # サーバーURLからファイル名を生成（記号を_に）
@@ -728,7 +728,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                     titles = [entry.get('title', 'no title') for entry in results]
                     try:
                         from qgis.core import QgsMessageLog, Qgis
-                        QgsMessageLog.logMessage(f"取得データセット（ページ{page}）: {titles}", 'CKAN-Browser', Qgis.Info)
+                        QgsMessageLog.logMessage(f"取得データセット（ページ{page}）: {titles}", 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
                     except Exception:
                         pass
                     QApplication.processEvents()
@@ -748,7 +748,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                 try:
                     import sqlite3, json
                     db_path = self._get_cache_db_path()
-                    QgsMessageLog.logMessage(self.util.tr(u"Caching data to SQLite has started."), 'CKAN-Browser', Qgis.Info)
+                    QgsMessageLog.logMessage(self.util.tr(u"Caching data to SQLite has started."), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
                     # --- パッケージ保存 ---
                     from .save_ckan_to_sqlite import save_ckan_packages_to_sqlite
                     save_ckan_packages_to_sqlite(db_path, all_results)
@@ -761,10 +761,10 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         c.execute('INSERT INTO groups (raw_json) VALUES (?)', (json.dumps(group),))
                     conn.commit()
                     conn.close()
-                    QgsMessageLog.logMessage(self.util.tr(u"Caching data to SQLite has finished."), 'CKAN-Browser', Qgis.Info)
+                    QgsMessageLog.logMessage(self.util.tr(u"Caching data to SQLite has finished."), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
                     self.util.msg_log_debug(self.util.tr(u"Saved {} records to SQLite DB: {}.").format(len(all_results), db_path))
                 except Exception as e:
-                    QgsMessageLog.logMessage(self.util.tr(u"SQLite save error: {}".format(e)), 'CKAN-Browser', Qgis.Critical)
+                    QgsMessageLog.logMessage(self.util.tr(u"SQLite save error: {}".format(e)), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
                     self.util.msg_log_error(self.util.tr(u"SQLite save error: {}".format(e)))
                 self.update_format_list(all_results)
                 self.list_all_clicked()

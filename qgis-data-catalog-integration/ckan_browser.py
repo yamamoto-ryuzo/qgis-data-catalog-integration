@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- CKAN-Browser
+ QGIS Data Catalog Integration / Catalog Integration
                                  A QGIS plugin
  Download and display CKAN enabled Open Data Portals
                               -------------------
@@ -42,23 +42,23 @@ class CKANBrowser:
             application at run time.
         :type iface: QgsInterface
         """
-        QgsMessageLog.logMessage('__init__', 'CKAN-Browser', Qgis.Info)
+    QgsMessageLog.logMessage('__init__', 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
         QSettings().setValue("ckan_browser/isopen", False)
         self.iface = iface
 
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
-        QgsMessageLog.logMessage(u'plugin directory: {}'.format(self.plugin_dir), 'CKAN-Browser', Qgis.Info)
+    QgsMessageLog.logMessage(u'plugin directory: {}'.format(self.plugin_dir), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
 
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
-        QgsMessageLog.logMessage(u'locale: {}'.format(locale), 'CKAN-Browser', Qgis.Info)
+    QgsMessageLog.logMessage(u'locale: {}'.format(locale), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
             'CKANBrowser_{}.qm'.format(locale))
         
-        QgsMessageLog.logMessage(u'locale_path: {}'.format(locale_path), 'CKAN-Browser', Qgis.Info)
+    QgsMessageLog.logMessage(u'locale_path: {}'.format(locale_path), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
 
         locale_path_en = os.path.join(
             self.plugin_dir,
@@ -77,13 +77,13 @@ class CKANBrowser:
         # "Translations are searched for in the reverse order in which they were installed, so the most recently
         # installed translation file is searched first and the first translation file installed is searched last."
         if locale != 'en':
-            QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), 'CKAN-Browser', Qgis.Info)
+            QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
             self.translator_en = QTranslator()
             self.translator_en.load(locale_path_en)
             if not QCoreApplication.installTranslator(self.translator_en):
-                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path_en), 'CKAN-Browser', Qgis.Critical)
+                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
             else:
-                QgsMessageLog.logMessage(u'locale "en" installed', 'CKAN-Browser', Qgis.Info)
+                QgsMessageLog.logMessage(u'locale "en" installed', 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -92,9 +92,9 @@ class CKANBrowser:
             self.translator.load(locale_path)
 
             if not QCoreApplication.installTranslator(self.translator):
-                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path), 'CKAN-Browser', Qgis.Critical)
+                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
             else:
-                QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), 'CKAN-Browser', Qgis.Info)
+                QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
 
         self.settings = Settings()
         self.settings.load()
@@ -193,7 +193,7 @@ class CKANBrowser:
 
         self.add_action(
             icon_path,
-            text=self.util.tr(u'Open Data (CKAN) Browser'),
+            text=self.util.tr(u'Catalog Integration'),
             callback=self.run,
             parent=self.iface.mainWindow()
         )

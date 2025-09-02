@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- CKAN-Browser
+ QGIS Data Catalog Integration / Catalog Integration
                                  A QGIS plugin
  Download and display CKAN enabled Open Data Portals
                               -------------------

@@ -1,8 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/CKANBrowser" >
+    <qresource prefix="/plugins/qgis-data-catalog-integration" >
         <file>icon.png</file>
-        <file>icon-settings.png</file>
-        <file>ckan_logo_big.png</file>
-        <file>icon-copy.png</file>
     </qresource>
 </RCC>

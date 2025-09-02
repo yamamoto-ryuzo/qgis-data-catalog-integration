@@ -45,18 +45,15 @@ def move_to_trash(filepath):
         os.remove(filepath)
         return True
 
-PLUGIN_DIR = 'CKAN-Browser'
-META_FILE = 'metadata_yamamoto.txt'
-ZIP_PREFIX = 'CKANBrowser_yamamoto_'
-ZIP_SUFFIX = ''
 
-# 必要最小限のファイル・ディレクトリ
+PLUGIN_DIR = 'qgis-data-catalog-integration'
+META_FILE = os.path.join(PLUGIN_DIR, 'metadata.txt')
+ZIP_PREFIX = 'QGISDataCatalogIntegration_'
+
+# 配布に含めるファイル・ディレクトリ（必要に応じて追加）
 INCLUDE_FILES = [
-    'CKAN-Browser',
-    'metadata_yamamoto.txt',
-    'Changlog_yamamoto.txt',
-    'readme_yamamoto.txt',
-    'readme_yamamoto.md',
+    PLUGIN_DIR,
+    # 'readme.md',  # ルートのreadmeも含めたい場合はコメント解除
 ]
 
 def parse_version(verstr):
@@ -73,18 +70,23 @@ def version_to_str(ver):
     return f'V{ver[0]}.{ver[1]}.{ver[2]}'
 
 def main():
-    # metadata_yamamoto.txtからバージョン取得
-    cp = ConfigParser()
-    cp.read(META_FILE, encoding='utf-8')
-    verstr = cp.get('general', 'version')
+
+
+    # metadata.txtからversion=行を直接パース
+    with open(META_FILE, encoding='utf-8') as f:
+        lines = f.readlines()
+    verstr = None
+    for line in lines:
+        if line.strip().startswith('version='):
+            verstr = line.strip().split('=', 1)[1]
+            break
+    if not verstr:
+        raise ValueError('version entry not found in metadata.txt')
     ver = parse_version(verstr)
     new_ver = bump_patch(ver)
     new_verstr = version_to_str(new_ver)
 
-
-    # metadata_yamamoto.txtのバージョン書き換え
-    with open(META_FILE, encoding='utf-8') as f:
-        lines = f.readlines()
+    # metadata.txtのバージョン書き換え
     with open(META_FILE, 'w', encoding='utf-8') as f:
         for line in lines:
             if line.strip().startswith('version='):
@@ -93,25 +95,26 @@ def main():
                 f.write(line)
 
     # 旧ZIP削除（ひとつ前のバージョンのみ削除、他は残す）
-    prev_verstr = version_to_str(ver)
     prev_zipname = f'{ZIP_PREFIX}{ver[0]}.{ver[1]}.{ver[2]}.zip'
     if os.path.exists(prev_zipname):
         move_to_trash(prev_zipname)
 
     # 一時作業ディレクトリ作成
+
     tmp_dir = f'{PLUGIN_DIR}_tmp_pack'
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)
     os.makedirs(tmp_dir)
 
-    # プラグインフォルダ配下に必要ファイルをコピー
+    # 必要なファイル・ディレクトリを一時ディレクトリにコピー
     for item in INCLUDE_FILES:
         if os.path.isdir(item):
-            shutil.copytree(item, os.path.join(tmp_dir, item))
+            shutil.copytree(item, os.path.join(tmp_dir, os.path.basename(item)))
         elif os.path.isfile(item):
-            shutil.copy2(item, os.path.join(tmp_dir, item))
+            shutil.copy2(item, os.path.join(tmp_dir, os.path.basename(item)))
 
     # ZIP作成
+
     zipname = f'{ZIP_PREFIX}{new_ver[0]}.{new_ver[1]}.{new_ver[2]}.zip'
     with zipfile.ZipFile(zipname, 'w', zipfile.ZIP_DEFLATED) as zf:
         for root, dirs, files in os.walk(tmp_dir):

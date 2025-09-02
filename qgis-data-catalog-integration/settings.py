@@ -95,9 +95,15 @@ class Settings:
             QgsMessageLog.logMessage(f'Failed to save ckan_servers.json: {e}', 'CKAN-Browser', Qgis.Warning)
 
     def _determine_version(self):
-        """http://gis.stackexchange.com/a/169266/8673"""
-        # error handling?
-        config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'metadata.txt'))
-
-        return config.get('general', 'version')
+        """
+        QGIS公式metadata.txt形式（セクションなし）に対応し、version=行を直接パース
+        """
+        meta_path = os.path.join(os.path.dirname(__file__), 'metadata.txt')
+        try:
+            with open(meta_path, encoding='utf-8') as f:
+                for line in f:
+                    if line.strip().startswith('version='):
+                        return line.strip().split('=', 1)[1]
+        except Exception:
+            pass
+        return ''
