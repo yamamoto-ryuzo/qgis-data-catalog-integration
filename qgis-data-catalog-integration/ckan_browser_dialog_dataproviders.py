@@ -107,64 +107,80 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
                 self.timer.stop()
                 self.timer = None
             self.list_model.clear()
-            instances_url = 'https://raw.githubusercontent.com/ckan/ckan-instances/gh-pages/config/instances.json'
-            self.util.msg_log_debug('before getting instances: ' + instances_url)
-            http_call = HttpCall(self.settings, self.util)
-            response = http_call.execute_request(
-                instances_url
-                # , headers=self.ua_chrome
-                , verify=False
-                , stream=True
-                # not needed anymore, as we use QgsNetworkAccessManager.instance() now
-                #, proxies=self.settings.get_proxies()[1]
-                , timeout=self.settings.request_timeout
-            )
+            
+            # 読み込むJSONファイル（複数）
+            instances_urls = [
+                'https://raw.githubusercontent.com/ckan/ckan-instances/gh-pages/config/instances.json'
+            ]
+            
+            # ローカルのJSONファイルを追加（存在する場合）
+            local_instances_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'resources', 'instances', 'instances.json')
+            if os.path.exists(local_instances_path):
+                # ファイルURIとして追加
+                file_uri = f"file:///{local_instances_path.replace('\\', '/')}"
+                instances_urls.append(file_uri)
+                self.util.msg_log_debug('Found local instances.json: ' + file_uri)
+            
+            # すべてのサーバーのリスト
+            self.servers = []
+            
+            for instances_url in instances_urls:
+                self.util.msg_log_debug('Getting instances from: ' + instances_url)
+                
+                # ローカルファイルの場合は直接読み込む
+                if instances_url.startswith('file:///'):
+                    try:
+                        local_path = instances_url[8:].replace('/', '\\')
+                        with open(local_path, 'r', encoding='utf-8') as f:
+                            result = json.load(f)
+                        self.process_instances_result(result)
+                        continue
+                    except Exception as e:
+                        self.util.msg_log_error(f"Failed to read local file: {str(e)}")
+                
+                # リモートファイルの場合はHTTPリクエスト
+                http_call = HttpCall(self.settings, self.util)
+                response = http_call.execute_request(
+                    instances_url
+                    # , headers=self.ua_chrome
+                    , verify=False
+                    , stream=True
+                    # not needed anymore, as we use QgsNetworkAccessManager.instance() now
+                    #, proxies=self.settings.get_proxies()[1]
+                    , timeout=self.settings.request_timeout
+                )
 
-            if not response.ok:
-                QApplication.restoreOverrideCursor()
-                self.util.dlg_warning(u'{}: {} {}'.format(response.status_code, response.status_message, response.reason))
-                return
-            else:
+                if not response.ok:
+                    self.util.msg_log_error(u'{}: {} {}'.format(response.status_code, response.status_message, response.reason))
+                    continue  # 次のURLを処理
+                
                 try:
                     json_txt = response.text.data().decode()
                     self.util.msg_log_debug(u'resp_msg (decoded):\n{} .......'.format(json_txt[:255]))
                     result = json.loads(json_txt)
+                    self.process_instances_result(result)
                 except TypeError as te:
                     self.util.msg_log_error(u'unexpected TypeError: {0}'.format(te))
-                    return False, self.util.tr(u'cc_api_not_accessible')
+                    continue
                 except AttributeError as ae:
                     self.util.msg_log_error(u'unexpected AttributeError: {0}'.format(ae))
-                    return False, self.util.tr(u'cc_api_not_accessible')
+                    continue
                 except:
                     self.util.msg_log_error(u'unexpected error during request or parsing of response:')
                     self.util.msg_log_last_exception()
-                    return False, self.util.tr(u'cc_invalid_json')
+                    continue
+            
+            # カスタムサーバーを追加
+            self.add_custom_servers()
+            
+            # サーバーがない場合は警告
+            if not self.servers:
+                QApplication.restoreOverrideCursor()
+                self.util.dlg_warning(self.util.tr(u'Failed to load any CKAN instances.'))
+                return
 
-                self.settings.load()
-                selected_servers = self.settings.selected_ckan_servers.split('|')
-                self.servers = []
-                self.util.msg_log_debug(u'{} custom servers'.format(len(self.settings.custom_servers)))
-                for cs_name, cs_info in self.settings.custom_servers.items():
-                    # cs_info: {url, type}
-                    if isinstance(cs_info, dict):
-                        url = cs_info.get('url', '')
-                        # type情報は今後の拡張用。現状はCKANのみ想定
-                    else:
-                        url = cs_info  # 後方互換
-                    si = ServerInstance(cs_name, cs_name, url, url, custom_entry=True)
-                    si.selected = True if si.settings_key in selected_servers else False
-                    self.servers.append(si)
-                for entry in result:
-                    url_api = None
-                    if 'url-api' in entry:
-                        url_api = entry['url-api']
-                        if 'geothermaldata' not in url_api:
-                            url_api = url_api.replace('http://', 'https://')
-                        url_api += '/api/3/'
-                    si = ServerInstance(entry['title'], entry['description'], entry['url'], url_api)
-                    si.selected = True if si.settings_key in selected_servers else False
-                    self.servers.append(si)
-
+            # サーバーリストの表示（両方のソース読み込み後に1回だけ行う）
+            if len(instances_urls) == instances_urls.index(instances_url) + 1:
                 for idx, server in enumerate(self.servers):
                     # サーバー名＋URLを表示
                     display_text = f"{server.short_title} ({server.url})"
@@ -179,6 +195,49 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
         finally:
             self.__update_server_count()
             QApplication.restoreOverrideCursor()
+
+    def process_instances_result(self, result):
+        """JSONから読み込んだインスタンス情報を処理"""
+        self.settings.load()
+        selected_servers = self.settings.selected_ckan_servers.split('|')
+        
+        for entry in result:
+            url_api = None
+            if 'url-api' in entry:
+                url_api = entry['url-api']
+                if 'geothermaldata' not in url_api:
+                    url_api = url_api.replace('http://', 'https://')
+                url_api += '/api/3/' if not url_api.endswith('/api/3/') else ''
+            description = entry.get('description', '')
+            si = ServerInstance(entry['title'], description, entry['url'], url_api)
+            si.selected = True if si.settings_key in selected_servers else False
+            
+            # 重複チェック（同じURLは追加しない）
+            is_duplicate = False
+            for existing in self.servers:
+                if existing.url == si.url:
+                    is_duplicate = True
+                    break
+            
+            if not is_duplicate:
+                self.servers.append(si)
+    
+    def add_custom_servers(self):
+        """カスタムサーバーを追加"""
+        self.settings.load()
+        selected_servers = self.settings.selected_ckan_servers.split('|')
+        
+        self.util.msg_log_debug(u'{} custom servers'.format(len(self.settings.custom_servers)))
+        for cs_name, cs_info in self.settings.custom_servers.items():
+            # cs_info: {url, type}
+            if isinstance(cs_info, dict):
+                url = cs_info.get('url', '')
+                # type情報は今後の拡張用。現状はCKANのみ想定
+            else:
+                url = cs_info  # 後方互換
+            si = ServerInstance(cs_name, cs_name, url, url, custom_entry=True)
+            si.selected = True if si.settings_key in selected_servers else False
+            self.servers.append(si)
 
     def delete_custom_server(self):
         self.util.msg_log_debug('delete context menu clicked')
