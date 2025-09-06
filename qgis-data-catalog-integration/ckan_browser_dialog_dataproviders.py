@@ -110,7 +110,8 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
             
             # 読み込むJSONファイル（複数）
             instances_urls = [
-                'https://raw.githubusercontent.com/ckan/ckan-instances/gh-pages/config/instances.json'
+                'https://raw.githubusercontent.com/ckan/ckan-instances/gh-pages/config/instances.json',
+                'https://raw.githubusercontent.com/yamamoto-ryuzo/qgis-data-catalog-integration/refs/heads/main/resources/instances/instances.json'
             ]
             
             # ローカルのJSONファイルを追加（存在する場合）
@@ -207,7 +208,9 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
                 url_api = entry['url-api']
                 if 'geothermaldata' not in url_api:
                     url_api = url_api.replace('http://', 'https://')
-                url_api += '/api/3/' if not url_api.endswith('/api/3/') else ''
+                # APIエンドポイントの形式を確認し、必要な場合のみ/api/3/を追加
+                if not (url_api.endswith('/api/3/') or url_api.endswith('/api/3')):
+                    url_api += '/api/3/'
             description = entry.get('description', '')
             si = ServerInstance(entry['title'], description, entry['url'], url_api)
             si.selected = True if si.settings_key in selected_servers else False
