@@ -1,25 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-/***************************************************************************
- QGIS Data Catalog Integration / Catalog Integration
-                                 A QGIS plugin
- Download and display CKAN enabled Open Data Portals
-                              -------------------
-        begin                : 2014-10-24
-        git sha              : $Format:%H$
-        copyright            : (C) 2014 by BergWerk GIS
-        email                : wb@BergWerk-GIS.at
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-"""
 from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction
@@ -29,7 +7,6 @@ from .ckan_browser_dialog_settings import CKANBrowserDialogSettings
 import os.path
 from .settings import Settings
 from .util import Util
-
 
 class CKANBrowser:
     """QGIS Plugin Implementation."""
@@ -42,23 +19,21 @@ class CKANBrowser:
             application at run time.
         :type iface: QgsInterface
         """
-    QgsMessageLog.logMessage('__init__', 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+        QgsMessageLog.logMessage('__init__', 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
         QSettings().setValue("ckan_browser/isopen", False)
         self.iface = iface
 
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
-    QgsMessageLog.logMessage(u'plugin directory: {}'.format(self.plugin_dir), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+        QgsMessageLog.logMessage(u'plugin directory: {}'.format(self.plugin_dir), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
 
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
-    QgsMessageLog.logMessage(u'locale: {}'.format(locale), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+        QgsMessageLog.logMessage(u'locale: {}'.format(locale), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
             'CKANBrowser_{}.qm'.format(locale))
-        
-    QgsMessageLog.logMessage(u'locale_path: {}'.format(locale_path), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
 
         locale_path_en = os.path.join(
             self.plugin_dir,
@@ -72,9 +47,36 @@ class CKANBrowser:
             locale_path = locale_path_en
 
         # if locale is not 'en' then additionally load 'en' as fallback for untranslated elements.
-        # !!! this has to be done before(!) adding the actual locale:
-        # https://doc.qt.io/qt-5/qcoreapplication.html#installTranslator
-        # "Translations are searched for in the reverse order in which they were installed, so the most recently
+        if locale != 'en':
+            QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+            self.translator_en = QTranslator()
+            self.translator_en.load(locale_path_en)
+            if not QCoreApplication.installTranslator(self.translator_en):
+                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
+            else:
+                QgsMessageLog.logMessage(u'locale "en" installed', 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+
+        if os.path.exists(locale_path):
+            self.translator = QTranslator()
+            self.translator.load(locale_path)
+            if not QCoreApplication.installTranslator(self.translator):
+                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
+            else:
+                QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+
+        self.settings = Settings()
+        self.settings.load()
+        self.util = Util(self.settings, self.iface.mainWindow())
+
+        # TODO ping API
+
+        # Create the dialog (after translation) and keep reference
+#         self.dlg = CKANBrowserDialog(self.settings, self.iface, self.iface.mainWindow())
+
+        # Declare instance attributes
+        self.actions = []
+        self.menu = self.util.tr(u'&Open Data (CKAN) Browser')
+        # TODO: We are going to let the user set this up in a future iteration
         # installed translation file is searched first and the first translation file installed is searched last."
         if locale != 'en':
             QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
