@@ -53,7 +53,7 @@
     <name>CKANBrowserDialogBase</name>
     <message>
         <source>dlg_base_title</source>
-        <translation>Browser Open Data (CKAN)</translation>
+        <translation>Catalog Integration</translation>
     </message>
     <message>
         <source>dlg_base_search_term</source>

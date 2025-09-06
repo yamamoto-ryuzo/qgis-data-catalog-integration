@@ -75,7 +75,7 @@ class CKANBrowser:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.util.tr(u'&Open Data (CKAN) Browser')
+        self.menu = self.util.tr(u'&Catalog Integration')
         # TODO: We are going to let the user set this up in a future iteration
         # installed translation file is searched first and the first translation file installed is searched last."
         if locale != 'en':
@@ -109,10 +109,10 @@ class CKANBrowser:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.util.tr(u'&Open Data (CKAN) Browser')
+        self.menu = self.util.tr(u'&Catalog Integration')
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'Open Data (CKAN) Browser')
-        self.toolbar.setObjectName(u'Open Data (CKAN) Browser')
+        self.toolbar = self.iface.addToolBar(u'Catalog Integration')
+        self.toolbar.setObjectName(u'Catalog Integration')
 
 
     def add_action(
@@ -213,7 +213,7 @@ class CKANBrowser:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.util.tr(u'&Open Data (CKAN) Browser'),
+                self.util.tr(u'&Catalog Integration'),
                 action)
             self.iface.removeToolBarIcon(action)
 

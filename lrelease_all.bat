@@ -1,7 +1,7 @@
 @echo off
 setlocal
 set LRELEASE="C:\Qt\linguist_6.9.1\lrelease.exe"
-set I18NDIR=CKAN-Browser\i18n
+set I18NDIR=qgis-data-catalog-integration\i18n
 
 for %%f in (%I18NDIR%\CKANBrowser_*.ts) do (
     echo Converting %%f ...

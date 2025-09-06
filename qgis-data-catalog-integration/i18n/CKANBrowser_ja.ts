@@ -6,7 +6,7 @@
     <message>
         <location filename="../ckan_browser_dialog_base.ui" line="35"/>
         <source>dlg_base_title</source>
-        <translation>オープンデータ(CKAN)ブラウザ</translation>
+        <translation>データカタログ統合</translation>
     </message>
     <message>
         <location filename="../ckan_browser_dialog_base.ui" line="57"/>
@@ -303,7 +303,7 @@
     <message>
         <location filename="../ckan_browser_dialog_disclaimer.ui" line="70"/>
         <source>dlg_dsc_title</source>
-        <translation>CKAN ブラウザ</translation>
+        <translation>データカタログ統合</translation>
     </message>
 </context>
 <context>
@@ -468,13 +468,13 @@
     </message>
     <message>
         <location filename="../ckan_browser.py" line="194"/>
-        <source>&amp;Open Data (CKAN) Browser</source>
-        <translation>オープンデータ(CKAN)ブラウザ(&amp;O)</translation>
+        <source>&amp;Catalog Integration</source>
+        <translation>データカタログ統合(&amp;D)</translation>
     </message>
     <message>
         <location filename="../ckan_browser.py" line="175"/>
-        <source>Open Data (CKAN) Browser</source>
-        <translation>オープンデータ(CKAN)ブラウザ</translation>
+        <source>Catalog Integration</source>
+        <translation>データカタログ統合</translation>
     </message>
     <message>
         <location filename="../ckan_browser.py" line="184"/>

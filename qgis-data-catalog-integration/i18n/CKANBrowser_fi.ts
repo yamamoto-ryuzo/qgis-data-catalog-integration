@@ -430,12 +430,12 @@
     </message>
     <message>
         <location filename="../ckan_browser.py" line="194"/>
-        <source>&amp;Open Data (CKAN) Browser</source>
+        <source>&amp;Catalog Integration</source>
         <translation>&amp;Avoin Data (CKAN) Selain</translation>
     </message>
     <message>
         <location filename="../ckan_browser.py" line="175"/>
-        <source>Open Data (CKAN) Browser</source>
+        <source>Catalog Integration</source>
         <translation>Avoin Data (CKAN) Selain</translation>
     </message>
     <message>
