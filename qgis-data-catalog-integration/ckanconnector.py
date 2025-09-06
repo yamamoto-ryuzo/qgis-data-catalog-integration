@@ -336,7 +336,16 @@ class CkanConnector:
             return False, self.util.tr(u'cc_download_error').format(sys.exc_info()[0]), None
 
     def __get_data(self, api, action):
-        url = u'{0}{1}'.format(api, action)
+        # データカタログ横断検索システムのAPIエンドポイント対応
+        if api.endswith('backend/api/'):
+            # backend/api/action/ の形式になるように調整
+            if action.startswith('action/'):
+                url = u'{0}{1}'.format(api, action)
+            else:
+                url = u'{0}action/{1}'.format(api, action.replace('action/', ''))
+        else:
+            url = u'{0}{1}'.format(api, action)
+            
         self.util.msg_log_debug(u'api request: {0}'.format(url))
         copy(url)
         # url = u'{0}{1}'.format(self.api, unicodedata.normalize('NFKD', action))
@@ -425,7 +434,12 @@ class CkanConnector:
 
         if not ckan_url.endswith("/"):
             ckan_url += "/"
-
+            
+        # データカタログ横断検索システムのAPI URLは特別な形式（backend/api/）を使用
+        if ckan_url.endswith("backend/api/"):
+            return True, ckan_url
+            
+        # 標準CKAN APIのバージョンチェック
         if not ckan_url.endswith("3/"):  # was bei neuen APIS > 3?
             self.util.msg_log_debug(u'unsupported API version: {0}'.format(ckan_url))
             return False, self.util.tr(u"cc_wrong_api")
