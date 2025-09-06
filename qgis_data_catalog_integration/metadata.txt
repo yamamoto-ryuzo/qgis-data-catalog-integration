@@ -1,9 +1,9 @@
 # QGIS Plugin metadata file
 ## Required
 [general]
-name=qgis-data-catalog-integration
+name=qgis_data_catalog_integration
 qgisMinimumVersion=3.10
-version=V1.0.17
+version=V1.0.22
 author=Ryuzo Yamamoto
 email=ryu@yamakun.net
 description=さまざまなデータセットを検索・追加できるQGISプラグインです / A QGIS plugin to search and add various datasets.

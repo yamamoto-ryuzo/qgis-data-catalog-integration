@@ -46,7 +46,7 @@ def move_to_trash(filepath):
         return True
 
 
-PLUGIN_DIR = 'qgis-data-catalog-integration'
+PLUGIN_DIR = 'qgis_data_catalog_integration'  # フォルダ名もPEP 8準拠に変更
 META_FILE = os.path.join(PLUGIN_DIR, 'metadata.txt')
 ZIP_PREFIX = 'QGISDataCatalogIntegration_'
 
@@ -109,7 +109,8 @@ def main():
     # 必要なファイル・ディレクトリを一時ディレクトリにコピー
     for item in INCLUDE_FILES:
         if os.path.isdir(item):
-            shutil.copytree(item, os.path.join(tmp_dir, os.path.basename(item)))
+            target_dir = os.path.join(tmp_dir, os.path.basename(item))
+            shutil.copytree(item, target_dir)
         elif os.path.isfile(item):
             shutil.copy2(item, os.path.join(tmp_dir, os.path.basename(item)))
 
