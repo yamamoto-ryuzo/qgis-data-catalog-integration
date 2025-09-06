@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/qgis-data-catalog-integration" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>

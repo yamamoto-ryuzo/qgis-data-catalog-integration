@@ -118,7 +118,13 @@ def main():
     zipname = f'{ZIP_PREFIX}{new_ver[0]}.{new_ver[1]}.{new_ver[2]}.zip'
     with zipfile.ZipFile(zipname, 'w', zipfile.ZIP_DEFLATED) as zf:
         for root, dirs, files in os.walk(tmp_dir):
+            # __pycache__ディレクトリをスキップ
+            if '__pycache__' in dirs:
+                dirs.remove('__pycache__')
             for file in files:
+                # .pycファイルをスキップ
+                if file.endswith('.pyc'):
+                    continue
                 abs_path = os.path.join(root, file)
                 rel_path = os.path.relpath(abs_path, tmp_dir)
                 zf.write(abs_path, rel_path)
