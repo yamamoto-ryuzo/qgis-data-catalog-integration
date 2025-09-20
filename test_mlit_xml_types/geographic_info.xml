@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GEOGRAPHIC_DATA xmlns:gml="http://www.opengis.net/gml">
+    <LOCATION_INFO>
+        <PLACE_NAME>東京駅</PLACE_NAME>
+        <PREFECTURE>東京都</PREFECTURE>
+        <CITY>千代田区</CITY>
+        <gml:Point>
+            <gml:pos>139.7673068 35.6809591</gml:pos>
+        </gml:Point>
+    </LOCATION_INFO>
+</GEOGRAPHIC_DATA>

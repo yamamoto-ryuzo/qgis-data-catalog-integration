@@ -38,6 +38,114 @@ class Util:
         self.main_win = main_win
         self.dlg_caption = settings.DLG_CAPTION
         self.settings = settings
+        
+        # グローバルXMLファイル管理用
+        self.global_xml_files = []
+        self.current_session_name = None
+
+    def start_xml_collection_session(self, session_name):
+        """
+        XMLファイル収集セッションを開始
+        """
+        self.current_session_name = session_name
+        self.global_xml_files = []
+        QgsMessageLog.logMessage(
+            f"*** XMLファイル収集セッション開始: {session_name} ***",
+            "CKAN Browser",
+            Qgis.Info
+        )
+
+    def add_xml_files_to_session(self, xml_files):
+        """
+        セッションにXMLファイルを追加
+        """
+        if self.current_session_name:
+            self.global_xml_files.extend(xml_files)
+            QgsMessageLog.logMessage(
+                f"XMLファイル追加: {len(xml_files)}個 (合計: {len(self.global_xml_files)}個)",
+                "CKAN Browser",
+                Qgis.Info
+            )
+
+    def finish_xml_collection_session(self):
+        """
+        XMLファイル収集セッションを終了し、統合処理を実行
+        """
+        if not self.current_session_name or not self.global_xml_files:
+            QgsMessageLog.logMessage(
+                "XMLファイル収集セッション: 処理対象なし",
+                "CKAN Browser",
+                Qgis.Info
+            )
+            return
+
+        QgsMessageLog.logMessage(
+            f"*** XMLファイル収集セッション終了: {len(self.global_xml_files)}個のファイルを統合処理 ***",
+            "CKAN Browser",
+            Qgis.Info
+        )
+        
+        try:
+            from .xml_attribute_loader import XmlAttributeLoader
+            from qgis.utils import iface
+            
+            QgsMessageLog.logMessage(
+                f"統合処理開始: {len(self.global_xml_files)}個のXMLファイル",
+                "CKAN Browser",
+                Qgis.Info
+            )
+            
+            # XMLファイルのリストをログに記録
+            for i, xml_file in enumerate(self.global_xml_files, 1):
+                QgsMessageLog.logMessage(
+                    f"  {i}. {xml_file}",
+                    "CKAN Browser",
+                    Qgis.Info
+                )
+            
+            xml_loader = XmlAttributeLoader(iface)
+            created_layers = xml_loader.load_multiple_xml_merged(self.global_xml_files, self.current_session_name)
+            
+            QgsMessageLog.logMessage(
+                f"統合処理完了: {len(created_layers) if created_layers else 0}個のレイヤを作成",
+                "CKAN Browser",
+                Qgis.Info
+            )
+            
+            # 作成されたレイヤの確認
+            if created_layers:
+                for layer in created_layers:
+                    if layer and layer.isValid():
+                        QgsMessageLog.logMessage(
+                            f"統合XMLレイヤが作成されました: {layer.name()} ({layer.featureCount()}件)",
+                            "CKAN Browser",
+                            Qgis.Info
+                        )
+                    else:
+                        QgsMessageLog.logMessage(
+                            "無効な統合XMLレイヤが作成されました",
+                            "CKAN Browser",
+                            Qgis.Warning
+                        )
+            else:
+                QgsMessageLog.logMessage(
+                    "統合XMLレイヤの作成に失敗しました",
+                    "CKAN Browser",
+                    Qgis.Warning
+                )
+                
+        except Exception as e:
+            import traceback
+            error_msg = f"XML統合処理エラー: {str(e)}\n{traceback.format_exc()}"
+            QgsMessageLog.logMessage(
+                error_msg,
+                "CKAN Browser",
+                Qgis.Critical
+            )
+        finally:
+            # セッションをリセット
+            self.global_xml_files = []
+            self.current_session_name = None
 
     # Moved from ckan_browser.py
     # noinspection PyMethodMayBeStatic
@@ -205,11 +313,33 @@ class Util:
 
             self.msg_log_debug(u'add lyrs: {0}'.format(data_dir))
             self.msg_log_debug(u'add lyrs: {0}'.format('\n'.join(geo_files)))
+            self.msg_log_debug(f"総ファイル数: {len(geo_files)}個")
 
             if len(geo_files) < 1:
                 self.msg_log_debug('len(geo_files)<1')
 #                 return False, u'Keine anzeigbaren Daten gefunden in\n{0}.\n\n\n     ===----!!!TODO!!!----===\n\nBenutzer anbieten Verzeichnis zu öffnen'.format(dir)
                 return False, {"message": "unknown fileytpe", "dir_path": data_dir}
+            
+            # XMLファイルを別途収集
+            xml_files = [f for f in geo_files if f.lower().endswith('.xml') and not os.path.basename(f).lower().endswith('.shp.xml')]
+            self.msg_log_debug(f"検出されたXMLファイル: {len(xml_files)}個")
+            for xml_file in xml_files:
+                self.msg_log_debug(f"  - {xml_file}")
+            
+            if xml_files:
+                # セッション管理が有効な場合はセッションに追加
+                if self.current_session_name:
+                    self.msg_log_debug(f"XMLファイルをセッションに追加: {len(xml_files)}個のファイル")
+                    self.msg_log_debug(f"セッション名: {self.current_session_name}")
+                    self.add_xml_files_to_session(xml_files)
+                else:
+                    # セッション管理が無効な場合は従来の処理
+                    self.msg_log_debug(f"XMLマージ処理を開始（セッション無効）: {len(xml_files)}個のファイル")
+                    self.msg_log_debug(f"current_session_name = {self.current_session_name}")
+                    self._process_xml_files(xml_files, layer_name)
+            else:
+                self.msg_log_debug("XMLファイルが見つからない")
+            
             for geo_file in geo_files:
                 if os.path.basename(geo_file).lower().endswith('.shp.xml'):
                     self.msg_log_debug(u'skipping {0}'.format(geo_file))
@@ -260,6 +390,9 @@ class Util:
 #                     lyr = self.__add_csv_table(full_path, full_layer_name)
                     self.msg_log_debug(u'Open CSV')
                     self._open_csv(full_path)
+                    continue
+                elif low_case.endswith('.xml'):
+                    # XMLファイルは既に_process_xml_filesで処理済みなのでスキップ
                     continue
                 elif(
                         low_case.endswith('.asc') or
@@ -604,6 +737,66 @@ class Util:
                     iface.addVectorLayer(uri, name, "delimitedtext")
                 else:
                     QMessageBox.warning(self.main_win, self.dlg_caption, "QGISインターフェースが利用できません (iface is None)。CSVレイヤを追加できません。")
+
+    def _process_xml_files(self, xml_files, base_layer_name):
+        """複数のXMLファイルを処理（タイプ別にマージ）"""
+        try:
+            # XMLローダーをインポート（循環インポートを避けるため、ここでインポート）
+            from .xml_attribute_loader import XmlAttributeLoader
+            from qgis.utils import iface
+            
+            if not xml_files:
+                return
+            
+            # XMLローダーを作成
+            xml_loader = XmlAttributeLoader(iface)
+            
+            # 常にマージ処理を使用（単一ファイルでも統一された処理）
+            self.msg_log_debug(f"XMLファイルをマージ処理します: {len(xml_files)}個のファイル")
+            created_layers = xml_loader.load_multiple_xml_merged(xml_files, base_layer_name)
+            
+            # 作成されたレイヤの確認（レイヤは既にプロジェクトに追加済み）
+            if created_layers:
+                for layer in created_layers:
+                    if layer and layer.isValid():
+                        self.msg_log_debug(f"XMLレイヤが作成・追加されました: {layer.name()} ({layer.featureCount()}件)")
+                        # QGISプロジェクト内での確認
+                        project_layer = QgsProject.instance().mapLayer(layer.id())
+                        if project_layer:
+                            self.msg_log_debug(f"  → プロジェクトに正常に登録されています")
+                        else:
+                            self.msg_log_debug(f"  → プロジェクトへの登録に問題があります")
+                    else:
+                        self.msg_log_debug("無効なレイヤが作成されました")
+            else:
+                self.msg_log_debug("XMLレイヤの作成に失敗しました")
+                
+        except Exception as e:
+            self.msg_log_debug(f"XML処理エラー: {str(e)}")
+            QMessageBox.warning(self.main_win, self.dlg_caption, f"XMLファイルの処理中にエラーが発生しました: {str(e)}")
+
+    def _open_xml_attributes(self, full_path, layer_name):
+        """XMLファイルを属性テーブルとして読み込む"""
+        try:
+            # XMLローダーをインポート（循環インポートを避けるため、ここでインポート）
+            from .xml_attribute_loader import XmlAttributeLoader
+            from qgis.utils import iface
+            
+            # XMLローダーを作成
+            xml_loader = XmlAttributeLoader(iface)
+            
+            # XMLファイルを属性テーブルとして読み込み
+            layer = xml_loader.load_xml_as_attribute_table(full_path, layer_name)
+            
+            if layer is not None:
+                self.msg_log_debug(f"XMLファイルを属性テーブルとして追加しました: {full_path}")
+            else:
+                self.msg_log_debug(f"XMLファイルの読み込みに失敗しました: {full_path}")
+                QMessageBox.warning(self.main_win, self.dlg_caption, f"XMLファイルの読み込みに失敗しました: {full_path}")
+                
+        except Exception as e:
+            self.msg_log_debug(f"XML属性読み込みエラー: {str(e)}")
+            QMessageBox.warning(self.main_win, self.dlg_caption, f"XMLファイルの読み込み中にエラーが発生しました: {str(e)}")
 
 
     def __open_with_system(self, file_name):

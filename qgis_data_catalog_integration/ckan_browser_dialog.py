@@ -285,6 +285,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         # --- 全選択ボタンのシグナル接続（存在する場合） ---
         if hasattr(self, 'IDC_bSelectAllResources'):
             self.IDC_bSelectAllResources.clicked.connect(self.select_all_resources)
+        
         # ダイアログ起動時に一度全件検索を実施（初期表示）
         self.list_all_clicked()
 
@@ -913,7 +914,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                     c.execute('SELECT raw_json FROM groups')
                     group_rows = c.fetchall()
                     if not group_rows:
-                        self.util.msg_log_error("DB groups table is empty")
+                        self.util.msg_log_debug("DB groups table is empty - グループ情報なしで続行")
                     else:
                         from PyQt5.QtCore import Qt
                         from PyQt5.QtWidgets import QListWidgetItem
@@ -1166,6 +1167,10 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         # レイヤ追加失敗時のマネージャで開くか確認ダイアログ選択（1回目だけ表示、以降は自動適用）
         addlayer_dialog_answer = None
 
+        # XMLファイル統合処理のセッションを開始
+        session_name = f"bulk_load_{len(all_resources)}_resources"
+        self.util.start_xml_collection_session(session_name)
+
         for resource in all_resources:
             # パッケージIDからpackage情報取得
             package_id = resource.get('_package_id')
@@ -1416,6 +1421,9 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                     if addlayer_dialog_answer == QMessageBox.Yes and isinstance(err_msg, dict):
                         self.util.open_in_manager(err_msg["dir_path"])
                 continue
+
+        # XMLファイル統合処理のセッションを終了
+        self.util.finish_xml_collection_session()
 
     def next_page_clicked(self):
         self.__search_package(page=+1)

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ksj_app_schema xmlns:gml="http://www.opengis.net/gml/3.2">
+    <gml:featureMember>
+        <ksj:AdministrativeBoundary gml:id="AB001">
+            <ksj:administrativeAreaCode>13101</ksj:administrativeAreaCode>
+            <ksj:administrativeAreaName>千代田区</ksj:administrativeAreaName>
+            <ksj:geometry>
+                <gml:Polygon>
+                    <gml:exterior>
+                        <gml:LinearRing>
+                            <gml:posList>139.7 35.7 139.8 35.7 139.8 35.8 139.7 35.8 139.7 35.7</gml:posList>
+                        </gml:LinearRing>
+                    </gml:exterior>
+                </gml:Polygon>
+            </ksj:geometry>
+        </ksj:AdministrativeBoundary>
+    </gml:featureMember>
+</ksj_app_schema>

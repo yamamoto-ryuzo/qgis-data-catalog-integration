@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ksj_app_schema SYSTEM "KS-META-13-v1_0.dtd">
+<ksj_app_schema>
+    <gml:featureMember>
+        <ksj:W09 gml:id="W09_001">
+            <ksj:POS>139.123456 35.654321</ksj:POS>
+            <ksj:W09_001>01</ksj:W09_001>
+            <ksj:W09_002>東京</ksj:W09_002>
+            <ksj:W09_003>河川水位観測所A</ksj:W09_003>
+            <ksj:W09_004>2.50</ksj:W09_004>
+        </ksj:W09>
+    </gml:featureMember>
+    <gml:featureMember>
+        <ksj:W09 gml:id="W09_002">
+            <ksj:POS>139.234567 35.765432</ksj:POS>
+            <ksj:W09_001>01</ksj:W09_001>
+            <ksj:W09_002>東京</ksj:W09_002>
+            <ksj:W09_003>河川水位観測所B</ksj:W09_003>
+            <ksj:W09_004>1.80</ksj:W09_004>
+        </ksj:W09>
+    </gml:featureMember>
+</ksj_app_schema>

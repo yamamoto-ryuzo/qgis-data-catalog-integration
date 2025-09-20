@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ksj_app_schema SYSTEM "KS-META-09-v2_1.dtd">
+<ksj_app_schema>
+    <gml:featureMember>
+        <ksj:L03-a gml:id="L03_001">
+            <ksj:POS>139.123456 35.654321</ksj:POS>
+            <ksj:L03_001>2020</ksj:L03_001>
+            <ksj:L03_002>1101</ksj:L03_002>
+            <ksj:L03_003>田</ksj:L03_003>
+        </ksj:L03-a>
+    </gml:featureMember>
+</ksj_app_schema>
