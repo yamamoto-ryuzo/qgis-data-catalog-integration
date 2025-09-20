@@ -97,12 +97,9 @@ class XmlAttributeLoader:
         
         for xml_type, file_paths in xml_groups.items():
             if len(file_paths) == 1:
-                # 単一ファイルでもソースファイル情報を追加
+                # 単一ファイル（個別のsource_file情報はload_xml_as_attribute_tableで設定済み）
                 layer = self.load_xml_as_attribute_table(file_paths[0])
                 if layer:
-                    # ソースファイル情報フィールドを追加
-                    self._add_source_file_field(layer)
-                    self._update_source_file_info(layer, file_paths[0])
                     created_layers.append(layer)
             else:
                 # 複数ファイルの場合はマージ
@@ -180,16 +177,31 @@ class XmlAttributeLoader:
         if not base_layer:
             return None
         
-        # ベースレイヤにファイル情報フィールドを追加
-        self._add_source_file_field(base_layer)
+        QgsMessageLog.logMessage(
+            f"ベースレイヤ作成完了: {file_paths[0]} -> {layer_name}",
+            "XML Attribute Loader",
+            Qgis.Info
+        )
         
         # 残りのファイルを順次マージ
         for i, file_path in enumerate(file_paths[1:], 2):
             try:
                 temp_layer = self.load_xml_as_attribute_table(file_path, f"temp_{i}")
                 if temp_layer:
-                    filename = os.path.basename(file_path)
-                    self._merge_layer_data(base_layer, temp_layer, filename)
+                    QgsMessageLog.logMessage(
+                        f"ファイル{i}をマージ: {file_path}",
+                        "XML Attribute Loader",
+                        Qgis.Info
+                    )
+                    self._merge_layer_data(base_layer, temp_layer, file_path)  # フルパスを渡す
+                    
+                    # マージ完了後、一時レイヤを削除
+                    QgsProject.instance().removeMapLayer(temp_layer.id())
+                    QgsMessageLog.logMessage(
+                        f"一時レイヤを削除: temp_{i}",
+                        "XML Attribute Loader",
+                        Qgis.Info
+                    )
                     
             except Exception as e:
                 QgsMessageLog.logMessage(
@@ -197,9 +209,6 @@ class XmlAttributeLoader:
                     "XML Attribute Loader", 
                     Qgis.Warning
                 )
-        
-        # 最初のファイル情報を設定
-        self._update_source_file_info(base_layer, file_paths[0])
         
         # 完了メッセージ
         if len(file_paths) == 1:
@@ -320,6 +329,11 @@ class XmlAttributeLoader:
             
             provider = layer.dataProvider()
             
+            # source_fileフィールドを追加
+            source_field = QgsField("source_file", QVariant.String)
+            source_field.setLength(500)  # フルパス用に長さを拡張
+            fields.append(source_field)
+            
             # フィールドを追加
             provider.addAttributes(fields)
             layer.updateFields()
@@ -333,6 +347,9 @@ class XmlAttributeLoader:
             # フィーチャをレイヤに追加
             provider.addFeatures(features)
             layer.updateExtents()
+            
+            # source_file情報をフルパスで設定
+            self._update_source_file_info(layer, xml_file_path)
             
             # プロジェクトに追加
             QgsProject.instance().addMapLayer(layer)
@@ -1029,12 +1046,15 @@ class XmlAttributeLoader:
                 "XML Attribute Loader", message, level=Qgis.Warning, duration=5)
     
     def _add_source_file_field(self, layer):
-        """レイヤーにソースファイル名フィールドを追加"""
+        """レイヤーにソースファイルパスフィールドを追加"""
         provider = layer.dataProvider()
-        provider.addAttributes([QgsField("source_file", QVariant.String)])
+        # フルパス用に十分な長さ（500文字）を確保
+        source_field = QgsField("source_file", QVariant.String)
+        source_field.setLength(500)
+        provider.addAttributes([source_field])
         layer.updateFields()
         
-    def _merge_layer_data(self, target_layer, source_layer, source_filename):
+    def _merge_layer_data(self, target_layer, source_layer, source_file_path):
         """ソースレイヤーのデータをターゲットレイヤーにマージ"""
         provider = target_layer.dataProvider()
         
@@ -1048,29 +1068,48 @@ class XmlAttributeLoader:
                 if field_name in [f.name() for f in target_layer.fields()]:
                     new_feature.setAttribute(field_name, feature.attribute(field_name))
             
-            # ソースファイル名を設定
-            new_feature.setAttribute("source_file", source_filename)
+            # ソースレイヤーが既にsource_file情報を持っている場合はそれを使用、
+            # なければ引数のsource_file_pathを使用
+            if "source_file" in [f.name() for f in source_layer.fields()]:
+                existing_source = feature.attribute("source_file")
+                if existing_source:
+                    new_feature.setAttribute("source_file", existing_source)
+                else:
+                    new_feature.setAttribute("source_file", source_file_path)
+            else:
+                new_feature.setAttribute("source_file", source_file_path)
             features.append(new_feature)
         
         provider.addFeatures(features)
         target_layer.updateExtents()
         
+        QgsMessageLog.logMessage(
+            f"マージ完了: {len(features)}件のレコードを'{source_file_path}'から追加",
+            "XML Attribute Loader",
+            Qgis.Info
+        )
+        
     def _update_source_file_info(self, layer, file_path):
         """レイヤーの全フィーチャーにソースファイル情報を更新"""
-        filename = os.path.basename(file_path)
         provider = layer.dataProvider()
         
         # 全フィーチャーのsource_fileフィールドを更新
         features = []
         for feature in layer.getFeatures():
-            feature.setAttribute("source_file", filename)
+            feature.setAttribute("source_file", file_path)  # フルパスを設定
             features.append(feature)
         
         # フィーチャーを更新
-        feature_dict = {f.id(): {layer.fields().indexFromName("source_file"): filename} 
+        feature_dict = {f.id(): {layer.fields().indexFromName("source_file"): file_path} 
                        for f in features}
         provider.changeAttributeValues(feature_dict)
         layer.updateExtents()
+        
+        QgsMessageLog.logMessage(
+            f"ソースファイル情報を更新: {len(features)}件のレコードに'{file_path}'を設定",
+            "XML Attribute Loader",
+            Qgis.Info
+        )
     
     def _show_success(self, message):
         """成功メッセージを表示"""
