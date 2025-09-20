@@ -378,7 +378,49 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             # auto-generate if still empty (same logic as refresh)
             if not all_results:
                 # build groups from immediate subdirectories and packages per subdirectory
-                data_exts = {'.csv', '.geojson', '.json', '.gpkg', '.kml', '.kmz', '.zip', '.tif', '.tiff', '.shp'}
+                # 除外ファイル・フォルダのリスト（メタデータファイルや一般的なシステムファイル）
+                exclude_names = {
+                    'packages.json', 'groups.json', 'thumbs.db', 'desktop.ini', '.ds_store',
+                    '__pycache__', '.git', '.svn', 'node_modules', '.tmp', 'temp'
+                }
+                exclude_extensions = {
+                    '.tmp', '.temp', '.bak', '.log', '.cache', '.lock', '.swp', '.swo',
+                    '.exe', '.dll', '.so', '.dylib', '.app', '.deb', '.rpm', '.msi'
+                }
+                
+                def _should_include_file(filename, filepath):
+                    """
+                    ファイルをデータベースに含めるかどうかを判定
+                    除外対象以外のすべてのファイルを含める（拡張子制限なし）
+                    """
+                    fname_lower = filename.lower()
+                    ext_lower = os.path.splitext(filename)[1].lower()
+                    
+                    # 除外ファイル名（完全一致）
+                    if fname_lower in exclude_names:
+                        return False
+                    
+                    # 除外拡張子
+                    if ext_lower in exclude_extensions:
+                        return False
+                    
+                    # 隠しファイル（Unix系）
+                    if filename.startswith('.') and len(filename) > 1:
+                        return False
+                    
+                    # 一時ファイル
+                    if filename.startswith('~') or filename.endswith('~'):
+                        return False
+                    
+                    # 空ファイルは除外（0バイト）
+                    try:
+                        if os.path.getsize(filepath) == 0:
+                            return False
+                    except:
+                        pass
+                    
+                    return True
+                
                 generated_pkgs = []
                 generated_groups = []
                 # immediate subdirectories -> groups
@@ -393,10 +435,10 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                             resources = []
                             for root, dirs, files in os.walk(p):
                                 for fname in files:
-                                    if os.path.splitext(fname)[1].lower() in data_exts:
-                                        path = os.path.join(root, fname)
-                                        ext = os.path.splitext(fname)[1].lower().lstrip('.')
-                                        file_url = 'file:///' + os.path.abspath(path).replace('\\', '/')
+                                    filepath = os.path.join(root, fname)
+                                    if _should_include_file(fname, filepath):
+                                        ext = os.path.splitext(fname)[1].lower().lstrip('.') or 'file'
+                                        file_url = 'file:///' + os.path.abspath(filepath).replace('\\', '/')
                                         resources.append({'id': f'{name}-res-{i}', 'name': fname, 'format': ext, 'url': file_url})
                                         i += 1
                             if resources:
@@ -409,16 +451,12 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                 try:
                     root_resources = []
                     j = 1
-                    exclude_names = {'packages.json', 'groups.json'}
                     for fname in os.listdir(local_path):
-                        # skip generated metadata files
-                        if fname in exclude_names:
-                            continue
-                        path = os.path.join(local_path, fname)
-                        if os.path.isfile(path):
-                            if os.path.splitext(fname)[1].lower() in data_exts:
-                                ext = os.path.splitext(fname)[1].lower().lstrip('.')
-                                file_url = 'file:///' + os.path.abspath(path).replace('\\', '/')
+                        filepath = os.path.join(local_path, fname)
+                        if os.path.isfile(filepath):
+                            if _should_include_file(fname, filepath):
+                                ext = os.path.splitext(fname)[1].lower().lstrip('.') or 'file'
+                                file_url = 'file:///' + os.path.abspath(filepath).replace('\\', '/')
                                 root_resources.append({'id': f'root-res-{j}', 'name': fname, 'format': ext, 'url': file_url})
                                 j += 1
                     if root_resources:
@@ -571,8 +609,49 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         """
                         pkgs = []
                         groups = []
-                        data_exts = {'.csv', '.geojson', '.json', '.gpkg', '.kml', '.kmz', '.zip', '.tif', '.tiff', '.shp'}
-                        exclude_names = {'packages.json', 'groups.json'}
+                        # 除外ファイル・フォルダのリスト（メタデータファイルや一般的なシステムファイル）
+                        exclude_names = {
+                            'packages.json', 'groups.json', 'thumbs.db', 'desktop.ini', '.ds_store',
+                            '__pycache__', '.git', '.svn', 'node_modules', '.tmp', 'temp'
+                        }
+                        exclude_extensions = {
+                            '.tmp', '.temp', '.bak', '.log', '.cache', '.lock', '.swp', '.swo',
+                            '.exe', '.dll', '.so', '.dylib', '.app', '.deb', '.rpm', '.msi'
+                        }
+                        
+                        def _should_include_file_refresh(filename, filepath):
+                            """
+                            ファイルをデータベースに含めるかどうかを判定（refresh用）
+                            除外対象以外のすべてのファイルを含める（拡張子制限なし）
+                            """
+                            fname_lower = filename.lower()
+                            ext_lower = os.path.splitext(filename)[1].lower()
+                            
+                            # 除外ファイル名（完全一致）
+                            if fname_lower in exclude_names:
+                                return False
+                            
+                            # 除外拡張子
+                            if ext_lower in exclude_extensions:
+                                return False
+                            
+                            # 隠しファイル（Unix系）
+                            if filename.startswith('.') and len(filename) > 1:
+                                return False
+                            
+                            # 一時ファイル
+                            if filename.startswith('~') or filename.endswith('~'):
+                                return False
+                            
+                            # 空ファイルは除外（0バイト）
+                            try:
+                                if os.path.getsize(filepath) == 0:
+                                    return False
+                            except:
+                                pass
+                            
+                            return True
+                        
                         # immediate subdirectories -> groups and packages
                         try:
                             for name in os.listdir(folder):
@@ -584,13 +663,10 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                                     resources = []
                                     for root, dirs, files in os.walk(p):
                                         for fname in files:
-                                            # skip generated metadata files (case-insensitive)
-                                            if fname.lower() in exclude_names:
-                                                continue
-                                            if os.path.splitext(fname)[1].lower() in data_exts:
-                                                path = os.path.join(root, fname)
-                                                ext = os.path.splitext(fname)[1].lower().lstrip('.')
-                                                file_url = 'file:///' + os.path.abspath(path).replace('\\', '/')
+                                            filepath = os.path.join(root, fname)
+                                            if _should_include_file_refresh(fname, filepath):
+                                                ext = os.path.splitext(fname)[1].lower().lstrip('.') or 'file'
+                                                file_url = 'file:///' + os.path.abspath(filepath).replace('\\', '/')
                                                 resources.append({'id': f'{name}-res-{i}', 'name': fname, 'format': ext, 'url': file_url})
                                                 i += 1
                                     if resources:
@@ -604,14 +680,11 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                             root_resources = []
                             j = 1
                             for fname in os.listdir(folder):
-                                # skip generated metadata files (case-insensitive)
-                                if fname.lower() in exclude_names:
-                                    continue
-                                path = os.path.join(folder, fname)
-                                if os.path.isfile(path):
-                                    if os.path.splitext(fname)[1].lower() in data_exts:
-                                        ext = os.path.splitext(fname)[1].lower().lstrip('.')
-                                        file_url = 'file:///' + os.path.abspath(path).replace('\\', '/')
+                                filepath = os.path.join(folder, fname)
+                                if os.path.isfile(filepath):
+                                    if _should_include_file_refresh(fname, filepath):
+                                        ext = os.path.splitext(fname)[1].lower().lstrip('.') or 'file'
+                                        file_url = 'file:///' + os.path.abspath(filepath).replace('\\', '/')
                                         root_resources.append({'id': f'root-res-{j}', 'name': fname, 'format': ext, 'url': file_url})
                                         j += 1
                             if root_resources:

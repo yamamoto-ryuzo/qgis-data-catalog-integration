@@ -100,7 +100,7 @@ You can search and download datasets from CKAN and other open data portals and u
 
 - 注意事項:
     - ローカル JSON は CKAN の形式に準拠していることが望ましい。形式が異なる場合、期待通りに読み込めないことがあります。
-    - 自動生成の際は代表的なデータ拡張子（`.csv`, `.geojson`, `.json`, `.gpkg`, `.kml`, `.kmz`, `.zip`, `.tif`, `.tiff`, `.shp`）を検出して package を作成します。必要に応じて拡張子を追加してください。
+    - 自動生成の際は、システムファイルや一時ファイルを除く**すべてのファイル**をスキャンして package を作成します。従来の拡張子制限を撤廃し、QGISで対応可能なあらゆる形式（および将来の新形式）に自動対応します。除外されるのは一時ファイル（`.tmp`, `.bak`, `.log`等）、システムファイル（`thumbs.db`, `.DS_Store`等）、実行ファイル（`.exe`, `.dll`等）のみです。
 
 - 最小の `packages.json` 例:
 

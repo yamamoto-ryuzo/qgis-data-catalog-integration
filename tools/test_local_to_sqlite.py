@@ -5,7 +5,48 @@ local = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__fil
 local = os.path.abspath(local)
 print('Local folder:', local)
 
-data_exts = {'.csv', '.geojson', '.json', '.gpkg', '.kml', '.kmz', '.zip', '.tif', '.tiff', '.shp'}
+# 除外ファイル・フォルダのリスト（メタデータファイルや一般的なシステムファイル）
+exclude_names = {
+    'packages.json', 'groups.json', 'thumbs.db', 'desktop.ini', '.ds_store',
+    '__pycache__', '.git', '.svn', 'node_modules', '.tmp', 'temp'
+}
+exclude_extensions = {
+    '.tmp', '.temp', '.bak', '.log', '.cache', '.lock', '.swp', '.swo',
+    '.exe', '.dll', '.so', '.dylib', '.app', '.deb', '.rpm', '.msi'
+}
+
+def should_include_file(filename, filepath):
+    """
+    ファイルをデータベースに含めるかどうかを判定
+    除外対象以外のすべてのファイルを含める（拡張子制限なし）
+    """
+    fname_lower = filename.lower()
+    ext_lower = os.path.splitext(filename)[1].lower()
+    
+    # 除外ファイル名（完全一致）
+    if fname_lower in exclude_names:
+        return False
+    
+    # 除外拡張子
+    if ext_lower in exclude_extensions:
+        return False
+    
+    # 隠しファイル（Unix系）
+    if filename.startswith('.') and len(filename) > 1:
+        return False
+    
+    # 一時ファイル
+    if filename.startswith('~') or filename.endswith('~'):
+        return False
+    
+    # 空ファイルは除外（0バイト）
+    try:
+        if os.path.getsize(filepath) == 0:
+            return False
+    except:
+        pass
+    
+    return True
 generated_pkgs = []
 generated_groups = []
 exclude_names = {'packages.json', 'groups.json'}
@@ -20,13 +61,10 @@ for name in os.listdir(local):
         resources = []
         for root, dirs, files in os.walk(p):
             for fname in files:
-                # skip generated metadata files (case-insensitive)
-                if fname.lower() in exclude_names:
-                    continue
-                if os.path.splitext(fname)[1].lower() in data_exts:
-                    path = os.path.join(root, fname)
-                    ext = os.path.splitext(fname)[1].lower().lstrip('.')
-                    file_url = 'file:///' + os.path.abspath(path).replace('\\', '/')
+                filepath = os.path.join(root, fname)
+                if should_include_file(fname, filepath):
+                    ext = os.path.splitext(fname)[1].lower().lstrip('.') or 'file'
+                    file_url = 'file:///' + os.path.abspath(filepath).replace('\\', '/')
                     resources.append({'id': f'{name}-res-{i}', 'name': fname, 'format': ext, 'url': file_url})
                     i += 1
         if resources:
@@ -37,14 +75,11 @@ for name in os.listdir(local):
 root_resources = []
 j = 1
 for fname in os.listdir(local):
-    # skip generated metadata files (case-insensitive)
-    if fname.lower() in exclude_names:
-        continue
-    path = os.path.join(local, fname)
-    if os.path.isfile(path):
-        if os.path.splitext(fname)[1].lower() in data_exts:
-            ext = os.path.splitext(fname)[1].lower().lstrip('.')
-            file_url = 'file:///' + os.path.abspath(path).replace('\\', '/')
+    filepath = os.path.join(local, fname)
+    if os.path.isfile(filepath):
+        if should_include_file(fname, filepath):
+            ext = os.path.splitext(fname)[1].lower().lstrip('.') or 'file'
+            file_url = 'file:///' + os.path.abspath(filepath).replace('\\', '/')
             root_resources.append({'id': f'root-res-{j}', 'name': fname, 'format': ext, 'url': file_url})
             j += 1
 if root_resources:
