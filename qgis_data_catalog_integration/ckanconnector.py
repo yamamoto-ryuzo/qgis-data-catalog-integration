@@ -335,6 +335,46 @@ class CkanConnector:
             # urls might have line breaks
             url = self.util.remove_newline(url)
             
+            # ローカルファイル（file:// / local:// / 直接パス）は直接コピーして処理する
+            try:
+                if isinstance(url, str) and (url.startswith('file://') or url.startswith('local://') or os.path.exists(url)):
+                    import shutil
+                    from urllib.parse import urlparse
+                    from urllib.request import url2pathname
+
+                    # local:// scheme -> パス部
+                    if url.startswith('local://'):
+                        local_path = url[len('local://'):]
+                    else:
+                        parsed = urlparse(url)
+                        # Windows: file:///C:/path の場合先頭の/を削る
+                        path = url2pathname(parsed.path)
+                        if path.startswith('/') and len(path) > 2 and path[2] == ':':
+                            path = path.lstrip('/')
+                        local_path = path
+
+                    # もし渡されたのが直接のファイルパスだった場合
+                    if not os.path.exists(local_path) and os.path.exists(url):
+                        local_path = url
+
+                    if os.path.exists(local_path):
+                        # dest の既存ファイルを削除
+                        try:
+                            if delete and os.path.exists(dest_file):
+                                os.remove(dest_file)
+                        except Exception:
+                            pass
+                        # コピー
+                        try:
+                            shutil.copyfile(local_path, dest_file)
+                            return True, '', dest_file
+                        except Exception as e:
+                            self.util.msg_log_error(u'ローカルファイルのコピーに失敗: {0}'.format(str(e)))
+                            return False, self.util.tr(u'cc_download_error').format(str(e)), None
+            except Exception:
+                # ローカル処理に失敗した場合は標準のネットワーク処理にフォールバック
+                pass
+
             # 接続確認
             connection_ok, error_message = self.__check_connection(url)
             if not connection_ok:
