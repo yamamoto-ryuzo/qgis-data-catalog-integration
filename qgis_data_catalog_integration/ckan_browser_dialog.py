@@ -393,22 +393,57 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         Returns (True, db_path) on success, (False, error_message) on failure.
         """
         try:
-            import json, sqlite3
-            pkg_json_path = os.path.join(local_path, 'packages.json')
+            import json, sqlite3, hashlib
+            
+            # キャッシュディレクトリのパスを取得
+            cache_dir = os.path.dirname(self._get_cache_db_path())
+            
+            # JSONファイル名の生成（URLハッシュ部分を使用）
+            url = getattr(self.settings, 'ckan_url', 'default')
+            url_hash = hashlib.md5(url.encode('utf-8')).hexdigest()[:12]
+            json_prefix = f'ckan_cache_{url_hash}'
+            cache_packages_path = os.path.join(cache_dir, f'{json_prefix}_packages.json')
+            cache_groups_path = os.path.join(cache_dir, f'{json_prefix}_groups.json')
+            
+            # まずキャッシュディレクトリのJSONをチェック
             all_results = []
-            if os.path.exists(pkg_json_path):
-                with open(pkg_json_path, 'r', encoding='utf-8') as f:
-                    all_results = json.load(f)
-            else:
-                pkg_dir = os.path.join(local_path, 'packages')
-                if os.path.isdir(pkg_dir):
-                    for fname in os.listdir(pkg_dir):
-                        if fname.lower().endswith('.json'):
-                            try:
-                                with open(os.path.join(pkg_dir, fname), 'r', encoding='utf-8') as f:
-                                    all_results.append(json.load(f))
-                            except Exception:
-                                continue
+            if os.path.exists(cache_packages_path):
+                self.util.msg_log_debug(f"キャッシュからJSONを読み込み: {cache_packages_path}")
+                try:
+                    with open(cache_packages_path, 'r', encoding='utf-8') as f:
+                        all_results = json.load(f)
+                except Exception as e:
+                    self.util.msg_log_error(f"キャッシュJSONの読み込みエラー: {str(e)}")
+            
+            # キャッシュがない場合はローカルフォルダから読み込み試行
+            if not all_results:
+                pkg_json_path = os.path.join(local_path, 'packages.json')
+                if os.path.exists(pkg_json_path):
+                    self.util.msg_log_debug(f"ローカルフォルダからJSONを読み込み: {pkg_json_path}")
+                    try:
+                        with open(pkg_json_path, 'r', encoding='utf-8') as f:
+                            all_results = json.load(f)
+                        # キャッシュにコピー
+                        with open(cache_packages_path, 'w', encoding='utf-8') as pf:
+                            json.dump(all_results, pf, ensure_ascii=False, indent=2)
+                        self.util.msg_log_debug(f"ローカルJSONをキャッシュにコピー: {cache_packages_path}")
+                    except Exception as e:
+                        self.util.msg_log_error(f"ローカルJSONの読み込みエラー: {str(e)}")
+                else:
+                    pkg_dir = os.path.join(local_path, 'packages')
+                    if os.path.isdir(pkg_dir):
+                        for fname in os.listdir(pkg_dir):
+                            if fname.lower().endswith('.json'):
+                                try:
+                                    with open(os.path.join(pkg_dir, fname), 'r', encoding='utf-8') as f:
+                                        all_results.append(json.load(f))
+                                except Exception:
+                                    continue
+                        if all_results:
+                            # キャッシュにコピー
+                            with open(cache_packages_path, 'w', encoding='utf-8') as pf:
+                                json.dump(all_results, pf, ensure_ascii=False, indent=2)
+                            self.util.msg_log_debug(f"複数のローカルJSONをキャッシュにマージ: {cache_packages_path}")
 
             # auto-generate if still empty (same logic as refresh)
             if not all_results:
@@ -502,30 +537,38 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
 
                 if generated_pkgs:
                     all_results = generated_pkgs
-                    # persist packages.json
+                    # persist packages.json to cache directory
                     try:
-                        with open(pkg_json_path, 'w', encoding='utf-8') as pf:
+                        cache_packages_path = os.path.join(cache_dir, f'{json_prefix}_packages.json')
+                        with open(cache_packages_path, 'w', encoding='utf-8') as pf:
                             json.dump(all_results, pf, ensure_ascii=False, indent=2)
-                    except Exception:
+                        self.util.msg_log_debug(f"JSONキャッシュ作成: {cache_packages_path}")
+                    except Exception as e:
+                        self.util.msg_log_error(f"JSONキャッシュ作成失敗: {str(e)}")
                         pass
-                    # persist groups.json if not present
+                    # persist groups.json to cache directory
                     try:
-                        groups_path = os.path.join(local_path, 'groups.json')
-                        if not os.path.exists(groups_path) and generated_groups:
-                            with open(groups_path, 'w', encoding='utf-8') as gf:
+                        cache_groups_path = os.path.join(cache_dir, f'{json_prefix}_groups.json')
+                        if generated_groups:
+                            with open(cache_groups_path, 'w', encoding='utf-8') as gf:
                                 json.dump(generated_groups, gf, ensure_ascii=False, indent=2)
+                            self.util.msg_log_debug(f"グループJSONキャッシュ作成: {cache_groups_path}")
                         # set group_result so it will be saved to DB below
                         group_result = generated_groups
-                    except Exception:
+                    except Exception as e:
+                        self.util.msg_log_error(f"グループJSONキャッシュ作成失敗: {str(e)}")
                         pass
 
             if not all_results:
-                # No packages found: create an empty packages.json to avoid errors and
+                # No packages found: create an empty packages.json in cache dir to avoid errors and
                 # continue to create an empty cache DB (tables will be created, no rows).
                 try:
-                    with open(pkg_json_path, 'w', encoding='utf-8') as pf:
+                    cache_packages_path = os.path.join(cache_dir, f'{json_prefix}_packages.json')
+                    with open(cache_packages_path, 'w', encoding='utf-8') as pf:
                         json.dump([], pf, ensure_ascii=False, indent=2)
-                except Exception:
+                    self.util.msg_log_debug(f"空のJSONキャッシュ作成: {cache_packages_path}")
+                except Exception as e:
+                    self.util.msg_log_error(f"空のJSONキャッシュ作成失敗: {str(e)}")
                     pass
                 # keep all_results as empty list and continue to create DB
 
@@ -730,6 +773,15 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
 
                         return pkgs, groups
 
+                    # キャッシュディレクトリとJSONファイル名を設定
+                    cache_dir = os.path.dirname(self._get_cache_db_path())
+                    import hashlib
+                    local_path_hash = hashlib.md5(local_path.encode('utf-8')).hexdigest()[:12]
+                    url_hash = local_path_hash
+                    json_prefix = f'ckan_cache_{url_hash}'
+                    cache_packages_path = os.path.join(cache_dir, f'{json_prefix}_packages.json')
+                    cache_groups_path = os.path.join(cache_dir, f'{json_prefix}_groups.json')
+                    
                     # Always attempt to auto-generate packages/groups from the local folder
                     generated = []
                     generated_groups = []
@@ -737,30 +789,52 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         generated_pkgs, generated_groups = _auto_generate_packages_from_folder(local_path)
                         if generated_pkgs:
                             all_results = generated_pkgs
-                            # persist packages.json for convenience (overwrite every refresh)
+                            # persist packages.json to cache (overwrite every refresh)
                             try:
-                                with open(pkg_json_path, 'w', encoding='utf-8') as pf:
+                                with open(cache_packages_path, 'w', encoding='utf-8') as pf:
                                     json.dump(all_results, pf, ensure_ascii=False, indent=2)
-                            except Exception:
+                                self.util.msg_log_debug(f"JSONキャッシュ更新: {cache_packages_path}")
+                            except Exception as e:
+                                self.util.msg_log_error(f"JSONキャッシュ更新失敗: {str(e)}")
                                 pass
                     except Exception:
                         generated_pkgs = []
                         generated_groups = []
-                    groups_path = os.path.join(local_path, 'groups.json')
-                    # If we generated groups during auto-generation, overwrite groups.json
+                    
+                    # If we generated groups during auto-generation, save to cache
                     if 'generated_groups' in locals() and generated_groups:
                         try:
-                            with open(groups_path, 'w', encoding='utf-8') as gf:
+                            with open(cache_groups_path, 'w', encoding='utf-8') as gf:
                                 json.dump(generated_groups, gf, ensure_ascii=False, indent=2)
                             group_result = generated_groups
-                        except Exception:
+                            self.util.msg_log_debug(f"グループJSONキャッシュ更新: {cache_groups_path}")
+                        except Exception as e:
+                            self.util.msg_log_error(f"グループJSONキャッシュ更新失敗: {str(e)}")
                             group_result = generated_groups
                     else:
-                        if os.path.exists(groups_path):
+                        # キャッシュからグループ情報を読み込む
+                        if os.path.exists(cache_groups_path):
                             try:
-                                with open(groups_path, 'r', encoding='utf-8') as f:
+                                with open(cache_groups_path, 'r', encoding='utf-8') as f:
                                     group_result = json.load(f)
-                            except Exception:
+                                self.util.msg_log_debug(f"グループJSONキャッシュを読み込み: {cache_groups_path}")
+                            except Exception as e:
+                                self.util.msg_log_error(f"グループJSONキャッシュ読み込み失敗: {str(e)}")
+                                group_result = []
+                        else:
+                            # キャッシュがない場合はローカルのgroups.jsonを確認
+                            groups_path = os.path.join(local_path, 'groups.json')
+                            if os.path.exists(groups_path):
+                                try:
+                                    with open(groups_path, 'r', encoding='utf-8') as f:
+                                        group_result = json.load(f)
+                                    # キャッシュにコピー
+                                    with open(cache_groups_path, 'w', encoding='utf-8') as gf:
+                                        json.dump(group_result, gf, ensure_ascii=False, indent=2)
+                                    self.util.msg_log_debug(f"ローカルグループJSONをキャッシュにコピー: {cache_groups_path}")
+                                except Exception:
+                                    group_result = []
+                            else:
                                 group_result = []
                     # save to sqlite
                     if all_results:
@@ -780,11 +854,13 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         self.window_loaded()
                         return
                     else:
-                        # No generated packages: create empty packages.json and proceed to create an empty DB
+                        # No generated packages: create empty packages.json in cache and proceed to create an empty DB
                         try:
-                            with open(pkg_json_path, 'w', encoding='utf-8') as pf:
+                            with open(cache_packages_path, 'w', encoding='utf-8') as pf:
                                 json.dump([], pf, ensure_ascii=False, indent=2)
-                        except Exception:
+                            self.util.msg_log_debug(f"空のJSONキャッシュ作成: {cache_packages_path}")
+                        except Exception as e:
+                            self.util.msg_log_error(f"空のJSONキャッシュ作成失敗: {str(e)}")
                             pass
                         # inform the user that an empty index was created
                         try:

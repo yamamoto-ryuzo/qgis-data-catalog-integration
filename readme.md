@@ -1,5 +1,3 @@
-
-
 # QGIS Data Catalog Integration（Catalog Integration）
 
 本プラグイン「QGIS Data Catalog Integration（Catalog Integration）」は、オリジナルの「CKAN-Browser」プラグインをベースに、機能拡張・改良を加えたものです。CKAN-Browser の思想と実装を継承しつつ、より多様なデータカタログやQGISとの統合を目指しています。
@@ -46,6 +44,10 @@ You can search and download datasets from CKAN and other open data portals and u
 - バージョン・更新履歴は `metadata_yamamoto.txt`, `Changlog_yamamoto.txt` で管理
     - Version and changelog are managed in `metadata_yamamoto.txt` and `Changlog_yamamoto.txt`
 
+## V2.3.0 ローカルフォルダのJSONキャッシュ処理を改善
+- ローカルフォルダ利用時、packages.json/groups.jsonの生成・読み込みをキャッシュディレクトリで一元管理
+- フォルダ内にJSONを残さず、SQLiteキャッシュと同じ場所に保存・参照する方式に変更
+- 既存のローカルJSONも初回のみキャッシュにコピーし、以降はキャッシュ優先で動作
 
 ## 使い方 / How to Use
 1. QGISで本プラグインを有効化
