@@ -18,6 +18,8 @@ class Settings:
         self.custom_servers = {}
         self.authcfg = None
         self.cache_dir = None
+        self.boxdrive_support = True  # BoxDriveサポートを有効化
+        self.long_path_support = True  # 長いパス名対応を有効化
         self.DLG_CAPTION = u'CKAN-Browser'
         self.KEY_CACHE_DIR = 'ckan_browser/cache_dir'
         self.KEY_CKAN_API = 'ckan_browser/ckan_api'
@@ -26,6 +28,8 @@ class Settings:
         self.KEY_SELECTED_CKAN_SERVERS = 'ckan_browser/selected_ckan_servers'
         self.KEY_CUSTOM_SERVERS = 'ckan_browser/custom_ckan_servers'
         self.KEY_SHOW_DEBUG_INFO = 'ckan_browser/show_debug_info'
+        self.KEY_BOXDRIVE_SUPPORT = 'ckan_browser/boxdrive_support'
+        self.KEY_LONG_PATH_SUPPORT = 'ckan_browser/long_path_support'
         self.version = self._determine_version()
 
     def load(self):
@@ -35,12 +39,29 @@ class Settings:
         if self.cache_dir is None:
             self.cache_dir = ''
         self.ckan_url = qgis_settings.value(self.KEY_CKAN_API, 'https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/')
+        # BoxDriveサポートと長いパス名対応の設定を読み込み
+        self.boxdrive_support = qgis_settings.value(self.KEY_BOXDRIVE_SUPPORT, True, bool)
+        self.long_path_support = qgis_settings.value(self.KEY_LONG_PATH_SUPPORT, True, bool)
         # サーバリストはキャッシュフォルダに保存
         if not self.cache_dir:
             # デフォルトキャッシュディレクトリ
             self.cache_dir = os.path.join(os.path.expanduser('~'), '.ckan_browser_cache')
         if not os.path.exists(self.cache_dir):
-            os.makedirs(self.cache_dir, exist_ok=True)
+            try:
+                os.makedirs(self.cache_dir, exist_ok=True)
+            except Exception as e:
+                QgsMessageLog.logMessage(f'キャッシュディレクトリの作成に失敗: {e}', 'CKAN-Browser', Qgis.Warning)
+                # 別の場所にフォールバック（ユーザーディレクトリ直下）
+                try:
+                    alternate_cache = os.path.join(os.path.expanduser('~'), 'CKAN_Cache')
+                    os.makedirs(alternate_cache, exist_ok=True)
+                    self.cache_dir = alternate_cache
+                    QgsMessageLog.logMessage(f'代替キャッシュディレクトリを使用: {alternate_cache}', 'CKAN-Browser', Qgis.Info)
+                except Exception:
+                    # 最終的にはシステムの一時ディレクトリを使用
+                    import tempfile
+                    self.cache_dir = tempfile.gettempdir()
+                    QgsMessageLog.logMessage(f'一時ディレクトリをキャッシュとして使用: {self.cache_dir}', 'CKAN-Browser', Qgis.Info)
         servers_path = os.path.join(self.cache_dir, 'ckan_servers.json')
         if os.path.exists(servers_path):
             try:
@@ -77,11 +98,25 @@ class Settings:
         qgis_settings.setValue(self.KEY_AUTHCFG, self.authcfg)
         qgis_settings.setValue(self.KEY_AUTH_PROPAGATE, self.auth_propagate)
         qgis_settings.setValue(self.KEY_SHOW_DEBUG_INFO, self.debug)
+        qgis_settings.setValue(self.KEY_BOXDRIVE_SUPPORT, self.boxdrive_support)
+        qgis_settings.setValue(self.KEY_LONG_PATH_SUPPORT, self.long_path_support)
         # サーバリストはキャッシュフォルダに保存
         if not self.cache_dir:
             self.cache_dir = os.path.join(os.path.expanduser('~'), '.ckan_browser_cache')
         if not os.path.exists(self.cache_dir):
-            os.makedirs(self.cache_dir, exist_ok=True)
+            try:
+                os.makedirs(self.cache_dir, exist_ok=True)
+            except Exception as e:
+                QgsMessageLog.logMessage(f'設定保存用キャッシュディレクトリの作成に失敗: {e}', 'CKAN-Browser', Qgis.Warning)
+                # 別の場所にフォールバック（ユーザーディレクトリ直下）
+                try:
+                    alternate_cache = os.path.join(os.path.expanduser('~'), 'CKAN_Cache')
+                    os.makedirs(alternate_cache, exist_ok=True)
+                    self.cache_dir = alternate_cache
+                except Exception:
+                    # 最終的にはシステムの一時ディレクトリを使用
+                    import tempfile
+                    self.cache_dir = tempfile.gettempdir()
         servers_path = os.path.join(self.cache_dir, 'ckan_servers.json')
         # custom_serversの値は{name: {url, type}}形式で保存
         data = {

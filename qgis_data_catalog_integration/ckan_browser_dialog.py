@@ -332,7 +332,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         """
         現在のCKANサーバーURLごとにキャッシュDBファイル名を分けて返す
         """
-        import re
+        import re, hashlib
         cache_dir = self.settings.cache_dir
         if not cache_dir or not os.path.isdir(cache_dir):
             if sys.platform == 'win32':
@@ -344,14 +344,48 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                 downloads = os.path.expanduser('~/Downloads')
             cache_dir = os.path.join(downloads, 'Catalog Integration')
             if not os.path.isdir(cache_dir):
-                os.makedirs(cache_dir, exist_ok=True)
+                try:
+                    os.makedirs(cache_dir, exist_ok=True)
+                except Exception as e:
+                    self.util.msg_log_error(f"キャッシュディレクトリの作成に失敗: {str(e)}")
+                    # 別の場所にフォールバック
+                    try:
+                        temp_dir = os.path.join(os.path.expanduser('~'), 'Catalog_Integration_Cache')
+                        os.makedirs(temp_dir, exist_ok=True)
+                        cache_dir = temp_dir
+                        self.util.msg_log(f"代替キャッシュディレクトリを作成: {temp_dir}")
+                    except Exception as e2:
+                        self.util.msg_log_error(f"代替キャッシュディレクトリの作成にも失敗: {str(e2)}")
+                        # 最終手段: 一時ディレクトリを使用
+                        import tempfile
+                        cache_dir = tempfile.gettempdir()
+                        self.util.msg_log(f"一時ディレクトリを使用: {cache_dir}")
+                        
         # サーバーURLからファイル名を生成（記号を_に）
         url = getattr(self.settings, 'ckan_url', 'default')
-        # Treat all servers uniformly: always store cache DB under cache_dir
-        # (Do not place DB inside the local server directory even when ckan_url
-        # points to a local folder or uses the local:// scheme.)
-        url_id = re.sub(r'[^a-zA-Z0-9]', '_', url)
+        # URLがBoxDriveパスなど長すぎる場合はハッシュ化
+        if len(url) > 100 or ('Box' in url and len(url) > 50):
+            self.util.msg_log(f"【BoxDrive対策】長いURLをハッシュ化: {url}")
+            hash_obj = hashlib.md5(url.encode('utf-8'))
+            url_hash = hash_obj.hexdigest()[:12]  # 12文字のハッシュ
+            
+            # 短縮化したURLの識別子を生成（最初の20文字 + ハッシュ）
+            url_parts = url.split('/')
+            if len(url_parts) > 2:
+                url_id = f"{url_parts[-2][:10]}_{url_parts[-1][:10]}_{url_hash}"
+            else:
+                url_id = f"box_{url_hash}"
+                
+            self.util.msg_log(f"【BoxDrive対策】ハッシュ化したURL ID: {url_id}")
+        else:
+            # 通常のURL処理: 記号を_に変換
+            url_id = re.sub(r'[^a-zA-Z0-9]', '_', url)
+            # 長さ制限
+            if len(url_id) > 50:
+                url_id = url_id[:40] + '_' + hashlib.md5(url_id.encode('utf-8')).hexdigest()[:8]
+                
         db_path = os.path.join(cache_dir, f'ckan_cache_{url_id}.db')
+        self.util.msg_log_debug(f"キャッシュDBパス: {db_path}")
         return db_path
 
     def _create_sqlite_from_local(self, local_path):

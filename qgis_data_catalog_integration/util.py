@@ -165,13 +165,93 @@ class Util:
         return QCoreApplication.translate('self.util', message, None)
 
     def create_dir(self, dir_path):
+        """
+        ディレクトリを作成。長いパス名にも対応
+        """
         if not os.path.exists(dir_path):
             try:
-                os.makedirs(dir_path)
+                # 長いパス対策：Windowsで長いパス名を扱う場合は接頭辞を追加
+                if sys.platform == 'win32' and len(dir_path) > 240:
+                    # 260文字制限を超えるパスにはUNC表記を使用
+                    if not dir_path.startswith('\\\\?\\'):
+                        self.msg_log_warning(u'【パス長対策】長いパスを検出 ({0}文字): {1}'.format(len(dir_path), dir_path))
+                        if os.path.isabs(dir_path):
+                            # 絶対パスの場合、UNC形式に変換
+                            dir_path = '\\\\?\\' + dir_path
+                            self.msg_log(u'【パス長対策】UNC形式に変換: {0}'.format(dir_path))
+                
+                # ディレクトリ作成
+                os.makedirs(dir_path, exist_ok=True)
+                self.msg_log_debug(u'ディレクトリを作成しました: {0}'.format(dir_path))
+                return True
             except OSError as ose:
-                if ose.errno != errno.EEXIST:
-                    return False
+                if ose.errno == errno.EEXIST:
+                    # 既に存在する場合は成功とみなす
+                    return True
+                # その他のエラー
+                self.msg_log_error(u'ディレクトリ作成エラー: {0} - {1}'.format(dir_path, ose))
+                # パス名が長すぎる場合は別の方法を試す
+                if ose.errno == errno.ENAMETOOLONG or 'ファイル名が長すぎます' in str(ose) or 'filename too long' in str(ose).lower():
+                    return self._create_dir_with_shorter_path(dir_path)
+                return False
         return True
+        
+    def _create_dir_with_shorter_path(self, dir_path):
+        """
+        長すぎるパス名の場合、パスを短縮してディレクトリ作成を試みる
+        """
+        try:
+            self.msg_log_warning(u'【パス長対策】パスが長すぎるため短縮を試みます: {0}'.format(dir_path))
+            
+            # パスの各コンポーネントに分解
+            import hashlib
+            path_components = []
+            remaining_path = dir_path
+            
+            while remaining_path and remaining_path != os.path.dirname(remaining_path):
+                base = os.path.basename(remaining_path)
+                remaining_path = os.path.dirname(remaining_path)
+                
+                # 各コンポーネントが長すぎる場合は短縮
+                if len(base) > 20:  # 20文字を超えるものは短縮
+                    hash_obj = hashlib.md5(base.encode('utf-8'))
+                    hash_str = hash_obj.hexdigest()[:8]
+                    short_base = base[:10] + '_' + hash_str  # 先頭10文字 + ハッシュ8文字
+                    self.msg_log(u'【パス短縮】コンポーネント短縮: {0} → {1}'.format(base, short_base))
+                    path_components.insert(0, short_base)
+                else:
+                    path_components.insert(0, base)
+            
+            # ルートパス/ドライブを保持
+            if remaining_path:
+                path_components.insert(0, remaining_path)
+                
+            # 新しいパスを構築
+            new_path = os.path.join(*path_components)
+            self.msg_log(u'【パス短縮】新しいパス: {0}'.format(new_path))
+            
+            # 短縮したパスでディレクトリ作成を試みる
+            os.makedirs(new_path, exist_ok=True)
+            self.msg_log(u'【パス短縮】短縮パスでディレクトリを作成しました: {0}'.format(new_path))
+            
+            # 元のパスへのシンボリックリンクを作成（可能な場合）
+            try:
+                parent_dir = os.path.dirname(dir_path)
+                if parent_dir and not os.path.exists(parent_dir):
+                    os.makedirs(parent_dir, exist_ok=True)
+                # Windowsではjunctionを作成
+                if sys.platform == 'win32':
+                    import subprocess
+                    subprocess.call(['cmd', '/c', 'mklink', '/J', dir_path, new_path], 
+                                   shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                    self.msg_log(u'【パス短縮】ジャンクションを作成: {0} → {1}'.format(dir_path, new_path))
+            except Exception as e:
+                self.msg_log_warning(u'【パス短縮】リンク作成に失敗: {0}'.format(e))
+                
+            return True
+        except Exception as e:
+            self.msg_log_error(u'【パス短縮】短縮パス作成に失敗: {0}'.format(e))
+            return False
 
     def check_dir(self, dir_path):
         if (
@@ -192,13 +272,40 @@ class Util:
         - Replace path separators and unsafe characters with underscore.
         - Collapse repeated underscores and trim.
         - Return fallback when resulting name is empty.
+        - ファイル名が長すぎる場合はハッシュ化して短縮
         """
-        import re, unicodedata
+        import re, unicodedata, hashlib
         try:
             if name is None:
                 name = ''
             name = str(name)
-        except Exception:
+            
+            # BoxDriveパスを検出して特別処理
+            if 'Box' in name and ('Box Drive' in name or 'BoxDrive' in name) and len(name) > 50:
+                # BoxDriveのパスは特に長くなりやすいので、よりアグレッシブに短縮
+                self.msg_log(u'【BoxDrive対策】BoxDriveパスを検出: {0}'.format(name))
+                hash_obj = hashlib.md5(name.encode('utf-8'))
+                hash_str = hash_obj.hexdigest()[:12]  # 12文字のハッシュ
+                
+                # パスの最後の2つのコンポーネントを保持
+                path_parts = name.split(os.sep)
+                if len(path_parts) >= 2:
+                    last_parts = '_'.join([p[:10] for p in path_parts[-2:]])  # 最後の2つの要素（各10文字まで）
+                    name = f"Box_{last_parts}_{hash_str}"
+                else:
+                    name = f"Box_{path_parts[-1][:15]}_{hash_str}"  # 最後の要素（15文字まで）
+                
+                self.msg_log(u'【BoxDrive対策】BoxDriveパスを短縮: {0}'.format(name))
+            # 通常の長いパス名の場合はハッシュ化して短くする
+            elif len(name) > max_len:
+                # オリジナルの名前の先頭部分を保持しつつ、ハッシュを追加
+                hash_obj = hashlib.md5(name.encode('utf-8'))
+                hash_str = hash_obj.hexdigest()[:8]  # 8文字のハッシュ
+                prefix_len = max_len - 9  # ハッシュ(8文字) + '_'(1文字) の分を引く
+                name = name[:prefix_len] + '_' + hash_str
+                self.msg_log(u'【パス短縮】長いファイル名を短縮: {0}... → {1}'.format(name[:30], name))
+        except Exception as e:
+            self.msg_log_error(u'【パス短縮】ファイル名短縮エラー: {0}'.format(e))
             name = ''
 
         if not name:
