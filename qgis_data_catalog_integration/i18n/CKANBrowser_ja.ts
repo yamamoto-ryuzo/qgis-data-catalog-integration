@@ -387,6 +387,22 @@
         <translation>フォルダは空でした。空の索引を作成しました: {0}</translation>
     </message>
     <message>
+        <location filename="../ckan_browser_dialog.py" line="797"/>
+        <source>py_dlg_set_info_local_read_error</source>
+        <translation>ローカルファイルの読み込みエラー: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ckan_browser_dialog.py" line="800"/>
+        <source>py_dlg_set_info_local_read_error_boxdrive</source>
+        <translation>BOXドライブのファイル読み込みエラー: {0}
+        
+BOXドライブはクラウドストレージのため、アクセスするまでファイルが実際にダウンロードされない場合があります。以下をお試しください：
+
+1. エクスプローラーでフォルダを開き、必要なファイルを一度開いてダウンロードする
+2. BOXドライブの同期設定で「ファイルをローカルに常に保持する」を選択する
+3. データをローカルドライブにコピーしてから操作する</translation>
+    </message>
+    <message>
         <location filename="../ckan_browser_dialog.py" line="441"/>
         <source>dlg_base_ttip_search</source>
         <translation>検索したい言葉をここに入力する.</translation>

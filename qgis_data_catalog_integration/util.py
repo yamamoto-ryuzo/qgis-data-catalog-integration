@@ -951,6 +951,12 @@ class Util:
             QMessageBox.No
         )
 
+    def msg_log(self, msg):
+        """
+        互換性のためのエイリアス - msg_log_debugと同じ機能
+        """
+        self.msg_log_debug(msg)
+        
     def msg_log_debug(self, msg):
         if self.settings.debug is True:
             QgsMessageLog.logMessage(msg, self.dlg_caption, Qgis.Info)

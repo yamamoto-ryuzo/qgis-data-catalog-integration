@@ -353,19 +353,19 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         temp_dir = os.path.join(os.path.expanduser('~'), 'Catalog_Integration_Cache')
                         os.makedirs(temp_dir, exist_ok=True)
                         cache_dir = temp_dir
-                        self.util.msg_log(f"代替キャッシュディレクトリを作成: {temp_dir}")
+                        self.util.msg_log_debug(f"代替キャッシュディレクトリを作成: {temp_dir}")
                     except Exception as e2:
                         self.util.msg_log_error(f"代替キャッシュディレクトリの作成にも失敗: {str(e2)}")
                         # 最終手段: 一時ディレクトリを使用
                         import tempfile
                         cache_dir = tempfile.gettempdir()
-                        self.util.msg_log(f"一時ディレクトリを使用: {cache_dir}")
+                        self.util.msg_log_debug(f"一時ディレクトリを使用: {cache_dir}")
                         
         # サーバーURLからファイル名を生成（記号を_に）
         url = getattr(self.settings, 'ckan_url', 'default')
         # URLがBoxDriveパスなど長すぎる場合はハッシュ化
         if len(url) > 100 or ('Box' in url and len(url) > 50):
-            self.util.msg_log(f"【BoxDrive対策】長いURLをハッシュ化: {url}")
+            self.util.msg_log_debug(f"【BoxDrive対策】長いURLをハッシュ化: {url}")
             hash_obj = hashlib.md5(url.encode('utf-8'))
             url_hash = hash_obj.hexdigest()[:12]  # 12文字のハッシュ
             
@@ -376,7 +376,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             else:
                 url_id = f"box_{url_hash}"
                 
-            self.util.msg_log(f"【BoxDrive対策】ハッシュ化したURL ID: {url_id}")
+            self.util.msg_log_debug(f"【BoxDrive対策】ハッシュ化したURL ID: {url_id}")
         else:
             # 通常のURL処理: 記号を_に変換
             url_id = re.sub(r'[^a-zA-Z0-9]', '_', url)
@@ -794,7 +794,19 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         # continue with empty all_results to create empty DB (save_ckan_packages_to_sqlite will create tables)
                 except Exception as e:
                     QApplication.restoreOverrideCursor()
-                    self.util.dlg_warning(self.util.tr('py_dlg_set_info_local_read_error').format(e))
+                    error_msg = str(e)
+                    
+                    # BOXドライブの場合の特別処理
+                    is_box_drive = False
+                    if 'Box' in local_path or 'Box Drive' in local_path:
+                        is_box_drive = True
+                    
+                    if is_box_drive:
+                        # BOXドライブ用のエラーメッセージを表示
+                        self.util.dlg_warning(self.util.tr('py_dlg_set_info_local_read_error_boxdrive').format(error_msg))
+                    else:
+                        # 通常のエラーメッセージ
+                        self.util.dlg_warning(self.util.tr('py_dlg_set_info_local_read_error').format(error_msg))
                     return
 
             # 1. APIからカテゴリ取得
@@ -836,7 +848,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                     titles = [entry.get('title', 'no title') for entry in results]
                     try:
                         from qgis.core import QgsMessageLog, Qgis
-                        QgsMessageLog.logMessage(f"取得データセット（ページ{page}）: {titles}", 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+                        QgsMessageLog.logMessage(f"取得データセット（ページ{page}）: {titles}", self.util.dlg_caption, Qgis.Info)
                     except Exception:
                         pass
                     QApplication.processEvents()
@@ -856,7 +868,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                 try:
                     import sqlite3, json
                     db_path = self._get_cache_db_path()
-                    QgsMessageLog.logMessage(self.util.tr(u"Caching data to SQLite has started."), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+                    QgsMessageLog.logMessage(self.util.tr(u"Caching data to SQLite has started."), self.util.dlg_caption, Qgis.Info)
                     # --- パッケージ保存 ---
                     from .save_ckan_to_sqlite import save_ckan_packages_to_sqlite
                     save_ckan_packages_to_sqlite(db_path, all_results)
@@ -869,10 +881,10 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         c.execute('INSERT INTO groups (raw_json) VALUES (?)', (json.dumps(group),))
                     conn.commit()
                     conn.close()
-                    QgsMessageLog.logMessage(self.util.tr(u"Caching data to SQLite has finished."), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+                    QgsMessageLog.logMessage(self.util.tr(u"Caching data to SQLite has finished."), self.util.dlg_caption, Qgis.Info)
                     self.util.msg_log_debug(self.util.tr(u"Saved {} records to SQLite DB: {}.").format(len(all_results), db_path))
                 except Exception as e:
-                    QgsMessageLog.logMessage(self.util.tr(u"SQLite save error: {}".format(e)), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
+                    QgsMessageLog.logMessage(self.util.tr(u"SQLite save error: {}".format(e)), self.util.dlg_caption, Qgis.Critical)
                     self.util.msg_log_error(self.util.tr(u"SQLite save error: {}".format(e)))
                 self.update_format_list(all_results)
                 self.list_all_clicked()

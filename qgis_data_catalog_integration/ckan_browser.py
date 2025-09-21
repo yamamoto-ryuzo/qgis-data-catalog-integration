@@ -19,17 +19,18 @@ class CKANBrowser:
             application at run time.
         :type iface: QgsInterface
         """
-        QgsMessageLog.logMessage('__init__', 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+        self.settings = Settings()
+        QgsMessageLog.logMessage('__init__', self.settings.DLG_CAPTION, Qgis.Info)
         QSettings().setValue("ckan_browser/isopen", False)
         self.iface = iface
 
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
-        QgsMessageLog.logMessage(u'plugin directory: {}'.format(self.plugin_dir), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+        QgsMessageLog.logMessage(u'plugin directory: {}'.format(self.plugin_dir), self.settings.DLG_CAPTION, Qgis.Info)
 
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
-        QgsMessageLog.logMessage(u'locale: {}'.format(locale), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+        QgsMessageLog.logMessage(u'locale: {}'.format(locale), self.settings.DLG_CAPTION, Qgis.Info)
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
@@ -48,21 +49,21 @@ class CKANBrowser:
 
         # if locale is not 'en' then additionally load 'en' as fallback for untranslated elements.
         if locale != 'en':
-            QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+            QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), self.settings.DLG_CAPTION, Qgis.Info)
             self.translator_en = QTranslator()
             self.translator_en.load(locale_path_en)
             if not QCoreApplication.installTranslator(self.translator_en):
-                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
+                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path_en), self.settings.DLG_CAPTION, Qgis.Critical)
             else:
-                QgsMessageLog.logMessage(u'locale "en" installed', 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+                QgsMessageLog.logMessage(u'locale "en" installed', self.settings.DLG_CAPTION, Qgis.Info)
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
             if not QCoreApplication.installTranslator(self.translator):
-                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
+                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path), self.settings.DLG_CAPTION, Qgis.Critical)
             else:
-                QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+                QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), self.settings.DLG_CAPTION, Qgis.Info)
 
         self.settings = Settings()
         self.settings.load()
@@ -79,13 +80,13 @@ class CKANBrowser:
         # TODO: We are going to let the user set this up in a future iteration
         # installed translation file is searched first and the first translation file installed is searched last."
         if locale != 'en':
-            QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+            QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), self.settings.DLG_CAPTION, Qgis.Info)
             self.translator_en = QTranslator()
             self.translator_en.load(locale_path_en)
             if not QCoreApplication.installTranslator(self.translator_en):
-                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path_en), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
+                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path_en), self.settings.DLG_CAPTION, Qgis.Critical)
             else:
-                QgsMessageLog.logMessage(u'locale "en" installed', 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+                QgsMessageLog.logMessage(u'locale "en" installed', self.settings.DLG_CAPTION, Qgis.Info)
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -94,9 +95,9 @@ class CKANBrowser:
             self.translator.load(locale_path)
 
             if not QCoreApplication.installTranslator(self.translator):
-                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Critical)
+                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path), self.settings.DLG_CAPTION, Qgis.Critical)
             else:
-                QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), 'QGIS Data Catalog Integration / Catalog Integration', Qgis.Info)
+                QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), self.settings.DLG_CAPTION, Qgis.Info)
 
         self.settings = Settings()
         self.settings.load()

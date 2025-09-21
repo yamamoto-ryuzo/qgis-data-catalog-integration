@@ -419,6 +419,22 @@
         <translation>Folder was empty. Created an empty index: {0}</translation>
     </message>
     <message>
+        <location filename="../ckan_browser_dialog.py" line="797"/>
+        <source>py_dlg_set_info_local_read_error</source>
+        <translation>Error reading local file: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ckan_browser_dialog.py" line="800"/>
+        <source>py_dlg_set_info_local_read_error_boxdrive</source>
+        <translation>BOX Drive file reading error: {0}
+        
+BOX Drive is a cloud storage solution where files may not be downloaded until accessed. Please try the following:
+
+1. Open the folder in Explorer and access the required files once to download them
+2. Choose "Always keep on this device" in your BOX Drive sync settings
+3. Copy the data to a local drive before processing</translation>
+    </message>
+    <message>
         <location filename="../ckan_browser_dialog_dataproviders.py" line="297"/>
         <source>py_dlg_set_info_no_local_packages</source>
         <translation>No CKAN packages found in specified folder: {0}</translation>
