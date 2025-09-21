@@ -1057,32 +1057,54 @@ class XmlAttributeLoader:
     def _merge_layer_data(self, target_layer, source_layer, source_file_path):
         """ソースレイヤーのデータをターゲットレイヤーにマージ"""
         provider = target_layer.dataProvider()
-        
+        # --- フィールドのユニオン処理 ---
+        # ターゲットに存在しないソース側のフィールドを追加して属性欠損を防ぐ
+        target_field_names = [f.name() for f in target_layer.fields()]
+        source_fields = [f for f in source_layer.fields()]
+        missing_fields = [f for f in source_fields if f.name() not in target_field_names]
+
+        if missing_fields:
+            # 追加前にログ
+            QgsMessageLog.logMessage(
+                f"ターゲットに存在しないフィールドを追加: {', '.join([f.name() for f in missing_fields])}",
+                "XML Attribute Loader",
+                Qgis.Info
+            )
+            provider.addAttributes(missing_fields)
+            target_layer.updateFields()
+
+        # フィールド名のキャッシュを再取得
+        target_field_names = [f.name() for f in target_layer.fields()]
+
         # ソースレイヤーのフィーチャーを取得して追加
         features = []
         for feature in source_layer.getFeatures():
-            # フィーチャーの属性をコピー
             new_feature = QgsFeature(target_layer.fields())
+
+            # ソースの各フィールド値を可能な限りコピー
             for field in source_layer.fields():
                 field_name = field.name()
-                if field_name in [f.name() for f in target_layer.fields()]:
+                if field_name in target_field_names:
                     new_feature.setAttribute(field_name, feature.attribute(field_name))
-            
-            # ソースレイヤーが既にsource_file情報を持っている場合はそれを使用、
-            # なければ引数のsource_file_pathを使用
+
+            # source_file 情報の取り扱い
+            existing_source = None
             if "source_file" in [f.name() for f in source_layer.fields()]:
                 existing_source = feature.attribute("source_file")
-                if existing_source:
+
+            if existing_source:
+                if "source_file" in target_field_names:
                     new_feature.setAttribute("source_file", existing_source)
-                else:
-                    new_feature.setAttribute("source_file", source_file_path)
             else:
-                new_feature.setAttribute("source_file", source_file_path)
+                if "source_file" in target_field_names:
+                    new_feature.setAttribute("source_file", source_file_path)
+
             features.append(new_feature)
-        
-        provider.addFeatures(features)
-        target_layer.updateExtents()
-        
+
+        if features:
+            provider.addFeatures(features)
+            target_layer.updateExtents()
+
         QgsMessageLog.logMessage(
             f"マージ完了: {len(features)}件のレコードを'{source_file_path}'から追加",
             "XML Attribute Loader",
