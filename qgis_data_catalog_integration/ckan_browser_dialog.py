@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QThread, pyqtSignal
 # データ取得用QThread
+from PyQt5.QtCore import QThread, pyqtSignal
 
 
 class DataFetchThread(QThread):
@@ -1260,39 +1260,43 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         self.__fill_link_box(url)
 
     def load_resource_clicked(self):
-        # 複数データセットの全リソースを一括ダウンロード
-        selected_items = self.IDC_listResults.selectedItems()
-        if not selected_items:
+        # シンプルに、UI上に表示されているリソース一覧を基準にダウンロード対象を決定する
+        if not hasattr(self, 'IDC_listRessources'):
             self.util.dlg_warning(self.util.tr(u'py_dlg_base_warn_no_resource'))
             return
-        # 全リソース取得
-        all_resources = []
+
+        # チェックされたリソースのみを対象とする（チェックが無ければ何もしない）
+        checked_list = self.__get_selected_resources()
+        if not checked_list:
+            self.util.dlg_warning(self.util.tr(u'py_dlg_base_warn_no_resource'))
+            return
+        all_resources = checked_list
+
+        # 結果リスト全体からパッケージマップを作成して、各リソースに _package_id を付与する（単純化）
         package_map = {}
-        format_text = self.IDC_comboFormat.currentText() if hasattr(self, 'IDC_comboFormat') else 'すべて'
-        format_lc = format_text.lower()
-        def is_format_match(res):
-            if format_text == 'すべて':
-                return True
-            if 'format' in res and res['format']:
-                fmt = res['format'].strip().lower()
-                if format_lc in fmt or fmt in format_lc:
-                    return True
-            return False
-        for item in selected_items:
-            package = item.data(Qt.UserRole)
-            if package is None:
+        for idx in range(self.IDC_listResults.count()):
+            itm = self.IDC_listResults.item(idx)
+            pkg = itm.data(Qt.UserRole)
+            if pkg and 'id' in pkg:
+                package_map[pkg['id']] = pkg
+
+        first_pkg_id = next(iter(package_map.keys()), None)
+        for res in all_resources:
+            if res.get('_package_id'):
                 continue
-            package_map[package['id']] = package
-            resources = package.get('resources', [])
-            filtered_resources = [res for res in resources if is_format_match(res)]
-            for res in filtered_resources:
-                res['_package_id'] = package['id']  # パッケージIDをリソースに付与
-                all_resources.append(res)
-        if not all_resources:
-            self.util.dlg_warning(self.util.tr(u'py_dlg_base_warn_no_resource'))
-            return
-            if hasattr(self, 'IDC_lblSelectedCount'):
-                self.IDC_lblSelectedCount.setText("選択中: 0件")
+            found = False
+            for pid, pkg in package_map.items():
+                for r in pkg.get('resources', []):
+                    if (res.get('id') and r.get('id') and res.get('id') == r.get('id')) or \
+                       (res.get('url') and r.get('url') and res.get('url') == r.get('url')) or \
+                       (res.get('name') and r.get('name') and res.get('name') == r.get('name')):
+                        res['_package_id'] = pid
+                        found = True
+                        break
+                if found:
+                    break
+            if not found and first_pkg_id:
+                res['_package_id'] = first_pkg_id
 
         # --- ここからダイアログ抑制用フラグ ---
         # 既存ファイル上書き確認ダイアログの選択（1回目だけ表示、以降は自動適用）
