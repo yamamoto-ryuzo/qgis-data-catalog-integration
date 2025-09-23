@@ -1,8 +1,8 @@
 # QGIS Data Catalog Integration（Catalog Integration）
 
-本プラグイン「QGIS Data Catalog Integration（Catalog Integration）」は、オリジナルの「CKAN-Browser」プラグインをベースに、機能拡張・改良を加えたものです。CKAN-Browser の思想と実装を継承しつつ、より多様なデータカタログやQGISとの統合を目指しています。
+本プラグイン「QGIS Data Catalog Integration（Catalog Integration）」は、オリジナルの「データカタログ統合」プラグインをベースに、機能拡張・改良を加えたものです。データカタログ統合 の思想と実装を継承しつつ、より多様なデータカタログやQGISとの統合を目指しています。
 
-This plugin, "QGIS Data Catalog Integration (Catalog Integration)", is based on the original "CKAN-Browser" plugin, with enhanced and extended features. It inherits the philosophy and implementation of CKAN-Browser, aiming for broader data catalog integration and deeper QGIS integration.
+This plugin, "QGIS Data Catalog Integration (Catalog Integration)", is based on the original "データカタログ統合" plugin, with enhanced and extended features. It inherits the philosophy and implementation of データカタログ統合, aiming for broader data catalog integration and deeper QGIS integration.
 # QGIS Data Catalog Integration (Catalog Integration)
 
 

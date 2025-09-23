@@ -170,6 +170,11 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                 item.setData(Qt.UserRole, res)
                 item.setCheckState(Qt.Checked)
                 self.IDC_listRessources.addItem(item)
+        # Log for debugging which path triggers label update
+        try:
+            self.util.msg_log_debug(u'select_all_resources: added {0} resources, calling update_resource_checked_count'.format(len(all_resources)))
+        except Exception:
+            pass
         self.update_resource_checked_count()
 
     def clear_selection(self):
@@ -295,6 +300,11 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             if self.IDC_listRessources.item(i).checkState() == Qt.Checked:
                 checked_count += 1
         selected_items = self.IDC_listResults.selectedItems() if hasattr(self, 'IDC_listResults') else []
+        # Debug log to indicate this function updated the label
+        try:
+            self.util.msg_log_debug(u'update_resource_checked_count: selected_datasets={0} checked_resources={1}'.format(len(selected_items), checked_count))
+        except Exception:
+            pass
         if hasattr(self, 'IDC_lblSelectedCount'):
             self.IDC_lblSelectedCount.setText(f"選択中　データセット: {len(selected_items)}件 / データ: {checked_count}件")
 
@@ -326,6 +336,11 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             item.setData(Qt.UserRole, res)
             item.setCheckState(Qt.Checked)
             self.IDC_listRessources.addItem(item)
+        # Debug log to indicate this function updated the label
+        try:
+            self.util.msg_log_debug(u'update_selected_count: selected_datasets={0} resources_count={1}'.format(len(selected_items), len(all_resources)))
+        except Exception:
+            pass
         if hasattr(self, 'IDC_lblSelectedCount'):
             self.IDC_lblSelectedCount.setText(f"選択中　データセット: {len(selected_items)}件 / データ: {len(all_resources)}件")
     def _get_cache_db_path(self):

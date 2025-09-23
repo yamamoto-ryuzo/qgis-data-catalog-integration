@@ -51,7 +51,7 @@ class Util:
         self.global_xml_files = []
         QgsMessageLog.logMessage(
             f"*** XMLファイル収集セッション開始: {session_name} ***",
-            "CKAN Browser",
+            self.dlg_caption,
             Qgis.Info
         )
 
@@ -63,7 +63,7 @@ class Util:
             self.global_xml_files.extend(xml_files)
             QgsMessageLog.logMessage(
                 f"XMLファイル追加: {len(xml_files)}個 (合計: {len(self.global_xml_files)}個)",
-                "CKAN Browser",
+                self.dlg_caption,
                 Qgis.Info
             )
 
@@ -74,16 +74,16 @@ class Util:
         if not self.current_session_name or not self.global_xml_files:
             QgsMessageLog.logMessage(
                 "XMLファイル収集セッション: 処理対象なし",
-                "CKAN Browser",
+                self.dlg_caption,
                 Qgis.Info
             )
             return
 
-        QgsMessageLog.logMessage(
-            f"*** XMLファイル収集セッション終了: {len(self.global_xml_files)}個のファイルを統合処理 ***",
-            "CKAN Browser",
-            Qgis.Info
-        )
+            QgsMessageLog.logMessage(
+                f"*** XMLファイル収集セッション終了: {len(self.global_xml_files)}個のファイルを統合処理 ***",
+                self.dlg_caption,
+                Qgis.Info
+            )
         
         try:
             from .xml_attribute_loader import XmlAttributeLoader
@@ -91,7 +91,7 @@ class Util:
             
             QgsMessageLog.logMessage(
                 f"統合処理開始: {len(self.global_xml_files)}個のXMLファイル",
-                "CKAN Browser",
+                self.dlg_caption,
                 Qgis.Info
             )
             
@@ -99,7 +99,7 @@ class Util:
             for i, xml_file in enumerate(self.global_xml_files, 1):
                 QgsMessageLog.logMessage(
                     f"  {i}. {xml_file}",
-                    "CKAN Browser",
+                    self.dlg_caption,
                     Qgis.Info
                 )
             
@@ -108,7 +108,7 @@ class Util:
             
             QgsMessageLog.logMessage(
                 f"統合処理完了: {len(created_layers) if created_layers else 0}個のレイヤを作成",
-                "CKAN Browser",
+                self.dlg_caption,
                 Qgis.Info
             )
             
@@ -118,19 +118,19 @@ class Util:
                     if layer and layer.isValid():
                         QgsMessageLog.logMessage(
                             f"統合XMLレイヤが作成されました: {layer.name()} ({layer.featureCount()}件)",
-                            "CKAN Browser",
+                            self.dlg_caption,
                             Qgis.Info
                         )
                     else:
                         QgsMessageLog.logMessage(
                             "無効な統合XMLレイヤが作成されました",
-                            "CKAN Browser",
+                            self.dlg_caption,
                             Qgis.Warning
                         )
             else:
                 QgsMessageLog.logMessage(
                     "統合XMLレイヤの作成に失敗しました",
-                    "CKAN Browser",
+                    self.dlg_caption,
                     Qgis.Warning
                 )
                 
@@ -139,7 +139,7 @@ class Util:
             error_msg = f"XML統合処理エラー: {str(e)}\n{traceback.format_exc()}"
             QgsMessageLog.logMessage(
                 error_msg,
-                "CKAN Browser",
+                self.dlg_caption,
                 Qgis.Critical
             )
         finally:
