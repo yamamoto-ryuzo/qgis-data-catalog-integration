@@ -1308,9 +1308,13 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         # レイヤ追加失敗時のマネージャで開くか確認ダイアログ選択（1回目だけ表示、以降は自動適用）
         addlayer_dialog_answer = None
 
-        # XMLファイル統合処理のセッションを開始
-        session_name = f"bulk_load_{len(all_resources)}_resources"
-        self.util.start_xml_collection_session(session_name)
+        # XMLファイル統合処理のセッションは、XMLと判定されるリソースがある場合のみ開始
+        xml_candidates = [r for r in all_resources if (r.get('format') and r.get('format').lower() == 'xml') or (r.get('url') and r.get('url').lower().endswith('.xml'))]
+        xml_session_started = False
+        if xml_candidates:
+            session_name = f"bulk_load_{len(xml_candidates)}_xml_resources"
+            self.util.start_xml_collection_session(session_name)
+            xml_session_started = True
 
         for resource in all_resources:
             # パッケージIDからpackage情報取得
@@ -1563,8 +1567,14 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         self.util.open_in_manager(err_msg["dir_path"])
                 continue
 
-        # XMLファイル統合処理のセッションを終了
-        self.util.finish_xml_collection_session()
+        # XMLファイル統合処理のセッションを終了（開始していた場合のみ）
+        try:
+            if xml_session_started:
+                self.util.finish_xml_collection_session()
+        except NameError:
+            # 古いコードパスでは xml_session_started が定義されていない場合がある
+            # その場合は finish を呼ばない
+            pass
 
     def next_page_clicked(self):
         self.__search_package(page=+1)

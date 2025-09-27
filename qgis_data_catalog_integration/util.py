@@ -452,17 +452,23 @@ class Util:
                     self.msg_log_debug(u'skipping {0}'.format(geo_file))
                     continue
                 self.msg_log_debug(geo_file)
-                full_path = os.path.join(data_dir, geo_file)
+                # geo_files contains absolute paths (from os.walk()).
+                # Ensure full_path is correct whether geo_file is absolute or relative.
+                if os.path.isabs(geo_file):
+                    full_path = geo_file
+                else:
+                    full_path = os.path.join(data_dir, geo_file)
                 full_layer_name = layer_name + ' - ' + os.path.basename(geo_file)
                 low_case = os.path.basename(geo_file).lower()
                 lyr = None
 
                 if low_case.endswith('json'):
                     self.msg_log_debug(u'Open JSON')
-                    if False is self.__is_geojson(full_path):
-                        if self.__open_with_system(full_path) > 0:
-                            if QMessageBox.Yes == self.dlg_yes_no(self.tr(u'py_dlg_base_open_manager').format(layer_url)):
-                                self.open_in_manager(data_dir)
+                    # Delegate JSON processing to a handler that can detect GeoJSON,
+                    # GSJMAP-like JSON, or other JSON types.
+                    handled = self._handle_json_file(full_path, full_layer_name, layer_url, data_dir)
+                    if handled:
+                        # handler already added necessary layers or logged/skipped appropriately
                         continue
 
                 if(
@@ -476,9 +482,8 @@ class Util:
                         low_case.endswith('.jpeg') or
                         low_case.endswith('.png')
                     ):
-                    if self.__open_with_system(full_path) > 0:
-                        if QMessageBox.Yes == self.dlg_yes_no(self.tr(u'py_dlg_base_open_manager').format(layer_url)):
-                            self.open_in_manager(data_dir)
+                    # 非GISファイルは自動で外部アプリで開かずスキップする
+                    self.msg_log_debug(f'Skipped non-GIS file (not opened): {full_path}')
                     continue
                 elif low_case.endswith('.qlr'):
                     lyr = self.__add_layer_definition_file(
@@ -516,9 +521,8 @@ class Util:
                     lyr = self.__add_vector_layer(full_path, full_layer_name)
                 if lyr is not None:
                     if not lyr.isValid():
-                        self.msg_log_debug(u'not valid: {0}'.format(full_path))
-                        if QMessageBox.Yes == self.dlg_yes_no(self.tr(u'py_dlg_base_open_manager').format(layer_url)):
-                            self.open_in_manager(data_dir)
+                        # 無効なレイヤは自動で外部アプリを開かずスキップしてログに残す
+                        self.msg_log_debug(u'not valid (skipped): {0}'.format(full_path))
                         continue
                     QgsProject.instance().addMapLayer(lyr)
                 else:
@@ -935,6 +939,137 @@ class Util:
         except:
             self.msg_log_debug(u'Error reading json'.format(sys.exc_info()[1]))
             return False
+    def _safe_load_json(self, file_path):
+        """Load JSON from file_path safely and return Python object or None on failure."""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as fh:
+                try:
+                    return json.load(fh)
+                except json.JSONDecodeError:
+                    # try without forcing utf-8 (legacy files)
+                    fh.seek(0)
+                    try:
+                        return json.load(open(file_path, 'r', encoding='cp932'))
+                    except Exception:
+                        self.msg_log_debug(f'JSON decode error for {file_path}')
+                        return None
+        except Exception:
+            self.msg_log_debug(f'Error opening JSON file: {file_path} ({sys.exc_info()[1]})')
+            return None
+
+    def _handle_json_file(self, full_path, full_layer_name, layer_url, data_dir):
+        """Detect JSON content type and handle accordingly.
+
+        Returns True if the file was handled (and should be skipped by caller),
+        False if caller should continue with default processing.
+        """
+        obj = self._safe_load_json(full_path)
+        if obj is None:
+            self.msg_log_debug(f'Failed to load JSON: {full_path}')
+            return False
+
+        # Quick heuristics
+        if isinstance(obj, dict) and ('features' in obj or obj.get('type') == 'FeatureCollection'):
+            # GeoJSON -> let existing vector loader handle it
+            self.msg_log_debug(f'GeoJSON detected: {full_path}')
+            lyr = self.__add_vector_layer(full_path, full_layer_name)
+            if lyr and lyr.isValid():
+                QgsProject.instance().addMapLayer(lyr)
+            else:
+                self.msg_log_debug(f'GeoJSON not valid or could not be added: {full_path}')
+            return True
+
+        # GSJMAP detection: look for keys typical of map pages
+        if isinstance(obj, dict) and ('page' in obj or 'downloadData' in obj or 'pages' in obj):
+            try:
+                # create a subfolder for this gsjmap
+                safe_name = self.safe_filename(os.path.basename(full_path).rsplit('.', 1)[0])
+                target_dir = os.path.join(data_dir, f'gsjmap_{safe_name}')
+                self.create_dir(target_dir)
+                # Extract sections with embedded geojson
+                pages = obj.get('page') or obj.get('pages') or []
+                if isinstance(pages, dict):
+                    pages = [pages]
+                written = 0
+                for p in pages:
+                    sections = p.get('section') or []
+                    if isinstance(sections, dict):
+                        sections = [sections]
+                    for s in sections:
+                        geo = s.get('geojson')
+                        if geo:
+                            out_name = s.get('name') or s.get('title') or f'section_{written}'
+                            out_file = os.path.join(target_dir, self.safe_filename(out_name) + '.geojson')
+                            try:
+                                with open(out_file, 'w', encoding='utf-8') as ofh:
+                                    json.dump(geo, ofh, ensure_ascii=False)
+                                written += 1
+                                self.msg_log_debug(f'Wrote section geojson: {out_file}')
+                            except Exception as e:
+                                self.msg_log_debug(f'Failed to write section geojson: {e}')
+                # If there is downloadData or resources, try to download into target_dir
+                # Minimal approach: look for URLs in obj['downloadData'] or obj['resource']
+                resources = []
+                if isinstance(obj.get('downloadData'), list):
+                    for r in obj.get('downloadData'):
+                        if isinstance(r, dict):
+                            url = r.get('url') or r.get('downloadUrl') or r.get('download')
+                            if url:
+                                resources.append(url)
+                # also check for page-level resources
+                for p in pages:
+                    if isinstance(p, dict):
+                        r = p.get('resource')
+                        if isinstance(r, list):
+                            for it in r:
+                                if isinstance(it, dict):
+                                    url = it.get('url') or it.get('downloadUrl')
+                                    if url:
+                                        resources.append(url)
+                # download resources (best-effort, skip on failure)
+                for url in resources:
+                    try:
+                        import urllib.request
+                        fn = os.path.basename(url.split('?')[0]) or self.safe_filename(url)
+                        dest = os.path.join(target_dir, fn)
+                        if not os.path.exists(dest):
+                            urllib.request.urlretrieve(url, dest)
+                            self.msg_log_debug(f'Downloaded resource: {dest}')
+                    except Exception as e:
+                        self.msg_log_debug(f'Failed to download resource {url}: {e}')
+                # Now scan the target_dir for GIS files and add them
+                added_any = False
+                for root, dirs, files in os.walk(target_dir):
+                    for f in files:
+                        fp = os.path.join(root, f)
+                        lc = f.lower()
+                        if lc.endswith('.geojson') or lc.endswith('.json'):
+                            lyr = self.__add_vector_layer(fp, layer_url + ' - ' + f)
+                            if lyr and lyr.isValid():
+                                QgsProject.instance().addMapLayer(lyr)
+                                added_any = True
+                        elif lc.endswith('.shp') or lc.endswith('.gpkg'):
+                            lyr = self.__add_vector_layer(fp, layer_url + ' - ' + f)
+                            if lyr and lyr.isValid():
+                                QgsProject.instance().addMapLayer(lyr)
+                                added_any = True
+                        elif lc.endswith('.tif') or lc.endswith('.tiff') or lc.endswith('.img'):
+                            lyr = self.__add_raster_layer(fp, layer_url + ' - ' + f)
+                            if lyr and lyr.isValid():
+                                QgsProject.instance().addMapLayer(lyr)
+                                added_any = True
+                if added_any:
+                    self.msg_log_debug(f'GSJMAP: added {written} embedded geojson + resources from {full_path}')
+                else:
+                    self.msg_log_debug(f'GSJMAP: no GIS files auto-added for {full_path} (wrote {written} geojson files)')
+                return True
+            except Exception as e:
+                self.msg_log_debug(f'Error handling GSJMAP JSON: {e}')
+                return False
+
+        # Unknown JSON type: do not auto-open, log and skip
+        self.msg_log_debug(f'Unknown JSON type (skipped): {full_path}')
+        return True
 
     def dlg_information(self, msg):
         QMessageBox.information(self.main_win, self.dlg_caption, msg)
