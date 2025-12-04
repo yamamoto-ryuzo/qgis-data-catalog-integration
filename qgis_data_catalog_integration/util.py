@@ -9,7 +9,7 @@ import sys
 import zipfile
 import json
 
-from PyQt5.QtCore import \
+from qgis.PyQt.QtCore import \
     QCoreApplication, \
     QDateTime, \
     QDir, \
@@ -22,8 +22,8 @@ from PyQt5.QtCore import \
     QUrlQuery
     #SIGNAL, \
     #SLOT
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtXml import QDomNode, QDomElement, QDomDocument, QDomNodeList
+from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.PyQt.QtXml import QDomNode, QDomElement, QDomDocument, QDomNodeList
 
 from qgis.core import QgsMessageLog, QgsVectorLayer, QgsRasterLayer, QgsProviderRegistry
 from qgis.core import QgsLayerTreeGroup, QgsProject

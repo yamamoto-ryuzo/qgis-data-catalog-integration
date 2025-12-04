@@ -22,9 +22,9 @@
 """
 
 import os
-from PyQt5.QtCore import Qt
-from PyQt5 import QtGui, uic
-from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog, QVBoxLayout, QDialogButtonBox
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt import QtGui, uic
+from qgis.PyQt.QtWidgets import QApplication, QDialog, QFileDialog, QVBoxLayout, QDialogButtonBox
 from collections import OrderedDict
 from .util import Util
 from .ckanconnector import CkanConnector
@@ -125,7 +125,7 @@ class CKANBrowserDialogSettings(QDialog, FORM_CLASS):
 
         buttonbox = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
-            Qt.Horizontal, dlg
+            Qt.Orientation.Horizontal, dlg
         )
 
         layout.addWidget(buttonbox)
@@ -133,8 +133,8 @@ class CKANBrowserDialogSettings(QDialog, FORM_CLASS):
         buttonbox.rejected.connect(dlg.close)
 
         dlg.setLayout(layout)
-        dlg.setWindowModality(Qt.WindowModal)
+        dlg.setWindowModality(Qt.WindowModality.WindowModal)
 
-        if dlg.exec_():
+        if dlg.exec():
             self.IDC_leAuthCfg.setText(acs.configId())
             self.cc.auth_cfg = acs.configId()

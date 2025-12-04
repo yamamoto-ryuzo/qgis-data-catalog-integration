@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5.QtCore import QSettings
+from qgis.PyQt.QtCore import QSettings
 import os
 import configparser
 
@@ -10,9 +10,10 @@ from qgis.core import QgsMessageLog, Qgis
 class Settings:
 
     def __init__(self):
+        # プラグインの設定を初期化
         self.debug = True
-        self.results_limit = 50
-        self.request_timeout = 15
+        self.results_limit = 50  # 検索結果の表示件数制限
+        self.request_timeout = 15  # HTTP要求のタイムアウト秒数
         self.ckan_url = None
         self.selected_ckan_servers = ''
         self.custom_servers = {}
@@ -21,18 +22,19 @@ class Settings:
         self.boxdrive_support = True  # BoxDriveサポートを有効化
         self.long_path_support = True  # 長いパス名対応を有効化
         self.DLG_CAPTION = u'データカタログ統合'  # 'Catalog Integration'
-        self.KEY_CACHE_DIR = 'ckan_browser/cache_dir'
-        self.KEY_CKAN_API = 'ckan_browser/ckan_api'
-        self.KEY_AUTHCFG = 'ckan_browser/authcfg'
-        self.KEY_AUTH_PROPAGATE = 'ckan_browser/auth_propagate'
-        self.KEY_SELECTED_CKAN_SERVERS = 'ckan_browser/selected_ckan_servers'
-        self.KEY_CUSTOM_SERVERS = 'ckan_browser/custom_ckan_servers'
-        self.KEY_SHOW_DEBUG_INFO = 'ckan_browser/show_debug_info'
-        self.KEY_BOXDRIVE_SUPPORT = 'ckan_browser/boxdrive_support'
-        self.KEY_LONG_PATH_SUPPORT = 'ckan_browser/long_path_support'
+        self.KEY_CACHE_DIR = 'geo_import/cache_dir'
+        self.KEY_CKAN_API = 'geo_import/ckan_api'
+        self.KEY_AUTHCFG = 'geo_import/authcfg'
+        self.KEY_AUTH_PROPAGATE = 'geo_import/auth_propagate'
+        self.KEY_SELECTED_CKAN_SERVERS = 'geo_import/selected_ckan_servers'
+        self.KEY_CUSTOM_SERVERS = 'geo_import/custom_ckan_servers'
+        self.KEY_SHOW_DEBUG_INFO = 'geo_import/show_debug_info'
+        self.KEY_BOXDRIVE_SUPPORT = 'geo_import/boxdrive_support'
+        self.KEY_LONG_PATH_SUPPORT = 'geo_import/long_path_support'
         self.version = self._determine_version()
 
     def load(self):
+        # QGISの設定から値を読み込む
         import json
         qgis_settings = QSettings()
         self.cache_dir = qgis_settings.value(self.KEY_CACHE_DIR, '')
@@ -91,6 +93,7 @@ class Settings:
         self.auth_propagate = qgis_settings.value(self.KEY_AUTH_PROPAGATE, False, bool)
 
     def save(self):
+        # 設定をQGISの設定とJSONファイルに保存
         import json
         qgis_settings = QSettings()
         qgis_settings.setValue(self.KEY_CACHE_DIR, self.cache_dir)

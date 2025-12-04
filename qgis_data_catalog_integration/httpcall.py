@@ -3,10 +3,10 @@
 import inspect
 
 from urllib.parse import unquote
-from PyQt5.QtCore import QEventLoop
-from PyQt5.QtCore import QUrl
-from PyQt5.QtNetwork import QNetworkReply
-from PyQt5.QtNetwork import QNetworkRequest
+from qgis.PyQt.QtCore import QEventLoop
+from qgis.PyQt.QtCore import QUrl
+from qgis.PyQt.QtNetwork import QNetworkReply
+from qgis.PyQt.QtNetwork import QNetworkRequest
 from qgis.core import QgsApplication
 from qgis.core import QgsNetworkAccessManager
 

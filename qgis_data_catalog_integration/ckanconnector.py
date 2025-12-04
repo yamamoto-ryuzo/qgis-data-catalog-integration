@@ -18,16 +18,14 @@ class CkanConnector:
     """CKAN Connector"""
 
     def __init__(self, settings, util):
+        # 設定とユーティリティを初期化
         self.settings = settings
         self.settings.load()
         self.util = util
-        #self.api = self.settings.ckan_url
-        #self.cache = self.settings.cache_dir
-        #self.limit = self.settings.results_limit
-        #self.auth_cfg = self.settings.authcfg
-        # self.sort = 'name asc, title asc'
+        # ソート順序を設定
         self.sort = 'name asc'
         self.mb_downloaded = 0
+        # Chrome風のユーザーエージェント設定
         self.ua_chrome = {
             b'Accept': b'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             # DON'T use: haven't found a way to tell QNetworkRequest to decompress on the fly
@@ -39,6 +37,7 @@ class CkanConnector:
         }
 
     def get_groups(self):
+        # CKANサーバーまたはローカルパスからグループ一覧を取得
         # BoxDriveなどの特殊パターンを早期検出して処理
         if isinstance(self.settings.ckan_url, str) and (
             'Box' in self.settings.ckan_url or 

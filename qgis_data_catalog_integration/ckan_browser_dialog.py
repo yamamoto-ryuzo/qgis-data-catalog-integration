@@ -1,5 +1,5 @@
 # データ取得用QThread
-from PyQt5.QtCore import QThread, pyqtSignal
+from qgis.PyQt.QtCore import QThread, pyqtSignal
 
 
 class DataFetchThread(QThread):
@@ -119,10 +119,10 @@ class DataFetchThread(QThread):
 import math
 import os
 import sys
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5 import QtGui, uic
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QListWidgetItem, QDialog, QMessageBox
+from qgis.PyQt.QtCore import Qt, QTimer
+from qgis.PyQt import QtGui, uic
+from qgis.PyQt import QtWidgets
+from qgis.PyQt.QtWidgets import QApplication, QListWidgetItem, QDialog, QMessageBox
 from .ckan_browser_dialog_disclaimer import CKANBrowserDialogDisclaimer
 from .ckan_browser_dialog_dataproviders import CKANBrowserDialogDataProviders
 from .pyperclip import copy
@@ -135,8 +135,12 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 
 class CKANBrowserDialog(QDialog, FORM_CLASS):
+    # メインダイアログクラス - データカタログのブラウズと検索を管理
+    
     def on_IDC_bSelectAllResources_clicked(self):
+        # 全リソース選択ボタンのクリックイベント処理
         self.select_all_resources()
+        
     def select_all_resources(self):
         """検索結果リストに表示されているデータセット・リソースのみ全選択・全チェックする"""
         # 検索結果リストの内容をそのまま全選択
@@ -156,7 +160,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             return False
         all_resources = []
         for item in selected_items:
-            package = item.data(Qt.UserRole)
+            package = item.data(Qt.ItemDataRole.UserRole)
             if package is None:
                 continue
             resources = package.get('resources', [])
@@ -167,8 +171,8 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             for res in all_resources:
                 disp = u'{}: {}'.format(res.get('format', 'no format'), res.get('url', '(no url)'))
                 item = QListWidgetItem(disp)
-                item.setData(Qt.UserRole, res)
-                item.setCheckState(Qt.Checked)
+                item.setData(Qt.ItemDataRole.UserRole, res)
+                item.setCheckState(Qt.CheckState.Checked)
                 self.IDC_listRessources.addItem(item)
         # Log for debugging which path triggers label update
         try:
@@ -270,7 +274,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         self.timer = QTimer()
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.window_loaded)
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         # don't initialized dialogs here, WaitCursor would be set several times
         # self.dlg_disclaimer = CKANBrowserDialogDisclaimer(self.settings)
         # self.dlg_dataproviders = CKANBrowserDialogDataProviders(self.settings, self.util)
@@ -280,7 +284,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             self.IDC_bRefreshSqlite.clicked.connect(self.refresh_sqlite_clicked)
         # データセット一覧で複数選択を可能に
         if hasattr(self, 'IDC_listResults'):
-            self.IDC_listResults.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+            self.IDC_listResults.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.MultiSelection)
             self.IDC_listResults.selectionModel().selectionChanged.connect(self.update_selected_count)
         if hasattr(self, 'IDC_listRessources'):
             self.IDC_listRessources.itemChanged.connect(self.update_resource_checked_count)
@@ -297,7 +301,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
     def update_resource_checked_count(self, item=None):
         checked_count = 0
         for i in range(self.IDC_listRessources.count()):
-            if self.IDC_listRessources.item(i).checkState() == Qt.Checked:
+            if self.IDC_listRessources.item(i).checkState() == Qt.CheckState.Checked:
                 checked_count += 1
         selected_items = self.IDC_listResults.selectedItems() if hasattr(self, 'IDC_listResults') else []
         # Debug log to indicate this function updated the label
@@ -322,7 +326,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             return False
         all_resources = []
         for item in selected_items:
-            package = item.data(Qt.UserRole)
+            package = item.data(Qt.ItemDataRole.UserRole)
             if package is None:
                 continue
             resources = package.get('resources', [])
@@ -333,8 +337,8 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         for res in all_resources:
             disp = u'{}: {}'.format(res.get('format', 'no format'), res.get('url', '(no url)'))
             item = QListWidgetItem(disp)
-            item.setData(Qt.UserRole, res)
-            item.setCheckState(Qt.Checked)
+            item.setData(Qt.ItemDataRole.UserRole, res)
+            item.setCheckState(Qt.CheckState.Checked)
             self.IDC_listRessources.addItem(item)
         # Debug log to indicate this function updated the label
         try:
@@ -625,7 +629,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         """
         全データセットを再取得しSQLiteキャッシュを再作成する（CKAN APIのstartパラメータでページング取得）
         """
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:
             # 1. APIからカテゴリ取得
             # determine if current server is LOCAL type
@@ -910,7 +914,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                 self.list_all_clicked()
                 return
             # 2. ページングで全件取得
-            from PyQt5.QtWidgets import QProgressDialog
+            from qgis.PyQt.QtWidgets import QProgressDialog
             rows_per_page = 1000
             start = 0
             all_results = []
@@ -927,7 +931,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                     max_page = (total_count + rows_per_page - 1) // rows_per_page
                     progress = QProgressDialog(self.util.tr('CKAN全件取得中...'), self.util.tr('キャンセル'), 0, max_page, self)
                     progress.setWindowTitle(self.util.tr('進捗'))
-                    progress.setWindowModality(Qt.WindowModal)
+                    progress.setWindowModality(Qt.WindowModality.WindowModal)
                     progress.setMinimumDuration(0)
                     progress.setValue(0)
                 if not results:
@@ -1053,15 +1057,15 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                     if not group_rows:
                         self.util.msg_log_debug("DB groups table is empty - グループ情報なしで続行")
                     else:
-                        from PyQt5.QtCore import Qt
-                        from PyQt5.QtWidgets import QListWidgetItem
+                        from qgis.PyQt.QtCore import Qt
+                        from qgis.PyQt.QtWidgets import QListWidgetItem
                         for row in group_rows:
                             group = json.loads(row[0])
                             title = group.get('title') or group.get('name', '')
                             self.util.msg_log_debug(f'Add group: {title}')
                             item = QListWidgetItem(title)
-                            item.setData(Qt.UserRole, group)
-                            item.setCheckState(Qt.Unchecked)
+                            item.setData(Qt.ItemDataRole.UserRole, group)
+                            item.setCheckState(Qt.CheckState.Unchecked)
                             self.IDC_listGroup.addItem(item)
                     # パッケージ一覧取得
                     c.execute('SELECT raw_json FROM packages')
@@ -1128,8 +1132,8 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         self.__search_package()
 
     def category_item_clicked(self, item):
-        self.util.msg_log_debug(item.data(Qt.UserRole)['name'])
-        self.current_group = item.data(Qt.UserRole)['name']
+        self.util.msg_log_debug(item.data(Qt.ItemDataRole.UserRole)['name'])
+        self.current_group = item.data(Qt.ItemDataRole.UserRole)['name']
         self.current_page = 1
         self.__search_package()
 
@@ -1137,8 +1141,8 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         self.util.msg_log_debug('select data provider clicked')
         self.dlg_dataproviders = CKANBrowserDialogDataProviders(self.settings)
         self.dlg_dataproviders.show()
-        if self.dlg_dataproviders.exec_():
-            QApplication.setOverrideCursor(Qt.WaitCursor)
+        if self.dlg_dataproviders.exec():
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
             self.window_loaded()
 
     def __search_package(self, page=None):
@@ -1152,7 +1156,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             if self.current_page > self.page_count:
                 self.current_page = self.page_count
             self.util.msg_log_debug(u'page is not None, cp:{0} pg:{1}'.format(self.current_page, page))
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         db_path = self._get_cache_db_path()
         format_text = self.IDC_comboFormat.currentText() if hasattr(self, 'IDC_comboFormat') else 'すべて'
         format_lc = format_text.lower()
@@ -1189,7 +1193,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             else:
                 title_txt = e
             item = QListWidgetItem(title_txt)
-            item.setData(Qt.UserRole, entry)
+            item.setData(Qt.ItemDataRole.UserRole, entry)
             self.IDC_listResults.addItem(item)
 
     def list_group_item_changed(self, item):
@@ -1213,7 +1217,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
             return False
         # 詳細情報はcurrentのみ
         if current is not None:
-            package = current.data(Qt.UserRole)
+            package = current.data(Qt.ItemDataRole.UserRole)
             if package is not None:
                 org = package.get('organization', {})
                 org_name = org.get('title') or org.get('name') or 'no organization'
@@ -1235,7 +1239,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         selected_items = self.IDC_listResults.selectedItems()
         all_resources = []
         for item in selected_items:
-            package = item.data(Qt.UserRole)
+            package = item.data(Qt.ItemDataRole.UserRole)
             if package is None:
                 continue
             resources = package.get('resources', [])
@@ -1244,8 +1248,8 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         for res in all_resources:
             disp = u'{}: {}'.format(res.get('format', 'no format'), res.get('url', '(no url)'))
             item = QListWidgetItem(disp)
-            item.setData(Qt.UserRole, res)
-            item.setCheckState(Qt.Checked)
+            item.setData(Qt.ItemDataRole.UserRole, res)
+            item.setCheckState(Qt.CheckState.Checked)
             self.IDC_listRessources.addItem(item)
         # 選択数（データセット数・リソース数）を表示
         if hasattr(self, 'IDC_lblSelectedCount'):
@@ -1255,7 +1259,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
     def resource_item_changed(self, new_item):
         if new_item is None:
             return
-        url = new_item.data(Qt.UserRole)['url']
+        url = new_item.data(Qt.ItemDataRole.UserRole)['url']
         self.util.msg_log_debug(url)
         self.__fill_link_box(url)
 
@@ -1276,7 +1280,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         package_map = {}
         for idx in range(self.IDC_listResults.count()):
             itm = self.IDC_listResults.item(idx)
-            pkg = itm.data(Qt.UserRole)
+            pkg = itm.data(Qt.ItemDataRole.UserRole)
             if pkg and 'id' in pkg:
                 package_map[pkg['id']] = pkg
 
@@ -1492,7 +1496,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                         do_download = False
             download_failed = False
             if do_download is True:
-                QApplication.setOverrideCursor(Qt.WaitCursor)
+                QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
                 QtWidgets.qApp.processEvents()
                 file_size_ok, file_size, hdr_exception = self.cc.get_file_size(url_val)
                 QApplication.restoreOverrideCursor()
@@ -1514,7 +1518,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
                 if hdr_exception:
                     self.util.msg_log_error(u'error getting size of response, HEAD request failed: {}'.format(hdr_exception))
                 self.util.msg_log_debug('setting wait cursor')
-                QApplication.setOverrideCursor(Qt.WaitCursor)
+                QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
                 QtWidgets.qApp.processEvents()
                 self.util.msg_log_debug('wait cursor set')
                 ok, err_msg, new_file_name = self.cc.download_resource(
@@ -1592,8 +1596,8 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         groups = []
         for i in range(0, self.IDC_listGroup.count()):
             item = self.IDC_listGroup.item(i)
-            if item.checkState() == Qt.Checked:
-                groups.append(item.data(Qt.UserRole)['name'])
+            if item.checkState() == Qt.CheckState.Checked:
+                groups.append(item.data(Qt.ItemDataRole.UserRole)['name'])
 
         # None: means search all groups
         if len(groups) < 1 or len(groups) == self.IDC_listGroup.count():
@@ -1604,8 +1608,8 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         res = []
         for i in range(0, self.IDC_listRessources.count()):
             item = self.IDC_listRessources.item(i)
-            if item.checkState() == Qt.Checked:
-                res.append(item.data(Qt.UserRole))
+            if item.checkState() == Qt.CheckState.Checked:
+                res.append(item.data(Qt.ItemDataRole.UserRole))
 
         if len(res) < 1:
             return None

@@ -23,10 +23,10 @@
 import json
 import os
 
-from PyQt5 import QtGui, uic
-from PyQt5.QtCore import QTimer, Qt, QStringListModel, QModelIndex, QObject, pyqtSignal, QEvent
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
-from PyQt5.QtWidgets import QDialog, QApplication, QListWidgetItem, QAction, QInputDialog, QLineEdit, QFileDialog
+from qgis.PyQt import QtGui, uic
+from qgis.PyQt.QtCore import QTimer, Qt, QStringListModel, QModelIndex, QObject, pyqtSignal, QEvent
+from qgis.PyQt.QtGui import QStandardItemModel, QStandardItem, QColor
+from qgis.PyQt.QtWidgets import QDialog, QApplication, QListWidgetItem, QAction, QInputDialog, QLineEdit, QFileDialog
 from .ckanconnector import CkanConnector
 from .httpcall import HttpCall
 from .serverinstance import ServerInstance
@@ -92,7 +92,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
         self.timer = QTimer()
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.window_loaded)
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
     def showEvent(self, event):
         self.util.msg_log_debug('showevent')
@@ -191,7 +191,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
                         if server.is_custom:
                             i.setBackground(QColor(0, 0, 255, 50))
                         i.setCheckable(True)
-                        i.setCheckState(Qt.Checked if server.selected else Qt.Unchecked)
+                        i.setCheckState(Qt.CheckState.Checked if server.selected else Qt.CheckState.Unchecked)
                         self.list_model.appendRow(i)
         finally:
             self.__update_server_count()
@@ -296,7 +296,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
                 if result.is_custom:
                     i.setBackground(QColor(0, 0, 255, 50))
                 i.setCheckable(True)
-                i.setCheckState(Qt.Checked if result.selected else Qt.Unchecked)
+                i.setCheckState(Qt.CheckState.Checked if result.selected else Qt.CheckState.Unchecked)
                 self.list_model.appendRow(i)
         self.__update_server_count()
 
@@ -339,7 +339,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
             self.util.dlg_information(self.util.tr(u'py_dlg_set_info_conn_succs'))
             return
 
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         ok, result = self.cc.test_groups(api_url)
         QApplication.restoreOverrideCursor()
 
@@ -386,7 +386,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
             server_type = 'LOCAL'
         
         # If not local, test via CKAN API
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         if server_type == 'CKAN':
             ok, result = self.cc.test_groups(api_url)
             QApplication.restoreOverrideCursor()
@@ -412,7 +412,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
 
         self.settings.custom_servers[server_name] = {"url": api_url, "type": server_type}
         self.settings.save()
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.window_loaded()
 
     def server_in_list_activated(self, model_index):
@@ -433,12 +433,12 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
     def item_checked_changed(self, item):
         self.util.msg_log_debug(
             u'item changed, checked:{} item:{} item.data:{}'.format(
-                item.checkState() == Qt.Checked,
+                item.checkState() == Qt.CheckState.Checked,
                 item,
                 item.data()
             )
         )
-        if item.checkState() == Qt.Unchecked:
+        if item.checkState() == Qt.CheckState.Unchecked:
             item.data().selected = False
             return
 
@@ -451,10 +451,10 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
         # now work on server visible in the list
         for row in range(self.list_model.rowCount()):
             i = self.list_model.item(row, 0)
-            if i != item and i.checkState() == Qt.Checked:
-                i.setCheckState(Qt.Unchecked)
+            if i != item and i.checkState() == Qt.CheckState.Checked:
+                i.setCheckState(Qt.CheckState.Unchecked)
 
-        item.data().selected = True if item.checkState() == Qt.Checked else False
+        item.data().selected = True if item.checkState() == Qt.CheckState.Checked else False
 
     def save_btn_clicked(self):
         self.util.msg_log_debug('save clicked')

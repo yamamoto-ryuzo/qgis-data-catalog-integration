@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction
+from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsMessageLog, Qgis
 from .ckan_browser_dialog import CKANBrowserDialog
 from .ckan_browser_dialog_settings import CKANBrowserDialogSettings
@@ -19,17 +19,22 @@ class CKANBrowser:
             application at run time.
         :type iface: QgsInterface
         """
+        # 設定を初期化
         self.settings = Settings()
         QgsMessageLog.logMessage('__init__', self.settings.DLG_CAPTION, Qgis.Info)
         QSettings().setValue("ckan_browser/isopen", False)
         self.iface = iface
 
-        # initialize plugin directory
+        # プラグインディレクトリを初期化
         self.plugin_dir = os.path.dirname(__file__)
         QgsMessageLog.logMessage(u'plugin directory: {}'.format(self.plugin_dir), self.settings.DLG_CAPTION, Qgis.Info)
 
-        # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        # ロケールを初期化（安全に取得）
+        locale_value = QSettings().value('locale/userLocale', 'en_US')
+        if locale_value and len(locale_value) >= 2:
+            locale = locale_value[0:2]
+        else:
+            locale = 'en'
         QgsMessageLog.logMessage(u'locale: {}'.format(locale), self.settings.DLG_CAPTION, Qgis.Info)
         locale_path = os.path.join(
             self.plugin_dir,
@@ -42,12 +47,12 @@ class CKANBrowser:
             'CKANBrowser_en.qm'
         )
 
-        # if we don't have translation for current locale, completely switch to English
+        # 現在のロケール用の翻訳ファイルが存在しない場合は英語に切り替え
         if not os.path.exists(locale_path):
             locale = 'en'
             locale_path = locale_path_en
 
-        # if locale is not 'en' then additionally load 'en' as fallback for untranslated elements.
+        # ロケールが英語でない場合、未翻訳要素用のフォールバックとして英語を追加でロード
         if locale != 'en':
             QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), self.settings.DLG_CAPTION, Qgis.Info)
             self.translator_en = QTranslator()
@@ -57,6 +62,7 @@ class CKANBrowser:
             else:
                 QgsMessageLog.logMessage(u'locale "en" installed', self.settings.DLG_CAPTION, Qgis.Info)
 
+        # ロケールに応じた翻訳をロード
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
@@ -65,53 +71,13 @@ class CKANBrowser:
             else:
                 QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), self.settings.DLG_CAPTION, Qgis.Info)
 
-        self.settings = Settings()
+        # 設定をロード
         self.settings.load()
         self.util = Util(self.settings, self.iface.mainWindow())
 
-        # TODO ping API
-
-        # Create the dialog (after translation) and keep reference
-#         self.dlg = CKANBrowserDialog(self.settings, self.iface, self.iface.mainWindow())
-
-        # Declare instance attributes
+        # インスタンス属性を宣言
         self.actions = []
         self.menu = self.util.tr(u'&Catalog Integration')
-        # TODO: We are going to let the user set this up in a future iteration
-        # installed translation file is searched first and the first translation file installed is searched last."
-        if locale != 'en':
-            QgsMessageLog.logMessage(u'loading "en" fallback: {}'.format(locale_path_en), self.settings.DLG_CAPTION, Qgis.Info)
-            self.translator_en = QTranslator()
-            self.translator_en.load(locale_path_en)
-            if not QCoreApplication.installTranslator(self.translator_en):
-                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path_en), self.settings.DLG_CAPTION, Qgis.Critical)
-            else:
-                QgsMessageLog.logMessage(u'locale "en" installed', self.settings.DLG_CAPTION, Qgis.Info)
-
-        if os.path.exists(locale_path):
-            self.translator = QTranslator()
-
-            # load translations according to locale
-            self.translator.load(locale_path)
-
-            if not QCoreApplication.installTranslator(self.translator):
-                QgsMessageLog.logMessage(u'could not install translator: {}'.format(locale_path), self.settings.DLG_CAPTION, Qgis.Critical)
-            else:
-                QgsMessageLog.logMessage(u'locale "{}" installed'.format(locale), self.settings.DLG_CAPTION, Qgis.Info)
-
-        self.settings = Settings()
-        self.settings.load()
-        self.util = Util(self.settings, self.iface.mainWindow())
-
-        # TODO ping API
-
-        # Create the dialog (after translation) and keep reference
-#         self.dlg = CKANBrowserDialog(self.settings, self.iface, self.iface.mainWindow())
-
-        # Declare instance attributes
-        self.actions = []
-        self.menu = self.util.tr(u'&Catalog Integration')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'Catalog Integration')
         self.toolbar.setObjectName(u'Catalog Integration')
 
@@ -191,6 +157,7 @@ class CKANBrowser:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
+        # QGISのGUI内にメニューエントリとツールバーアイコンを作成
 
         icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
 
@@ -212,6 +179,7 @@ class CKANBrowser:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
+        # QGISのGUIからプラグインメニュー項目とアイコンを削除
         for action in self.actions:
             self.iface.removePluginMenu(
                 self.util.tr(u'&Catalog Integration'),
@@ -220,7 +188,9 @@ class CKANBrowser:
 
     def run(self):
         """Run method that performs all the real work"""
+        # プラグインのメイン処理を実行
         
+        # ダイアログが既に開いているかチェック
         is_open = QSettings().value("ckan_browser/isopen", False)
         #Python treats almost everything as True````
         #is_open = bool(is_open)
@@ -241,7 +211,7 @@ class CKANBrowser:
         if dir_check is False or api_url_check is False:
             dlg = CKANBrowserDialogSettings(self.settings, self.iface, self.iface.mainWindow())
             dlg.show()
-            result = dlg.exec_()
+            result = dlg.exec()
             if result != 1:
                 return
 
@@ -255,7 +225,7 @@ class CKANBrowser:
             self.dlg.show()
             #self.dlg.open()
             # Run the dialog event loop
-            result = self.dlg.exec_()
+            result = self.dlg.exec()
             # See if OK was pressed
             if result:
                 pass
@@ -263,6 +233,7 @@ class CKANBrowser:
             QSettings().setValue("ckan_browser/isopen", False)
 
     def open_settings(self):
+        # 設定ダイアログを開く
         dlg = CKANBrowserDialogSettings(self.settings, self.iface, self.iface.mainWindow())
         dlg.show()
-        dlg.exec_()
+        dlg.exec()

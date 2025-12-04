@@ -24,11 +24,12 @@
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
-    """Load CKANBrowser class from file CKANBrowser.
+    """Load GeoImport class from file GeoImport.
 
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
-    #
+    # プラグインのメインクラスをロードして返す
+    # QGISインターフェースを受け取り、CKANBrowserインスタンスを初期化
     from .ckan_browser import CKANBrowser
     return CKANBrowser(iface)

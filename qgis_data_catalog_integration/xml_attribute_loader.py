@@ -22,7 +22,7 @@
 
 import os
 import xml.etree.ElementTree as ET
-from PyQt5.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
     QgsVectorLayer, 
     QgsFeature, 
