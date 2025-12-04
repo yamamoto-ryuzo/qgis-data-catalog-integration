@@ -36,21 +36,47 @@ class CKANBrowser:
         else:
             locale = 'en'
         QgsMessageLog.logMessage(u'locale: {}'.format(locale), self.settings.DLG_CAPTION, Qgis.Info)
-        locale_path = os.path.join(
+        # Try new naming `geo_import_*.qm` first, fall back to legacy `CKANBrowser_*.qm`.
+        locale_path_geo = os.path.join(
+            self.plugin_dir,
+            'i18n',
+            'geo_import_{}.qm'.format(locale))
+
+        locale_path_ckan = os.path.join(
             self.plugin_dir,
             'i18n',
             'CKANBrowser_{}.qm'.format(locale))
 
-        locale_path_en = os.path.join(
+        locale_path_geo_en = os.path.join(
+            self.plugin_dir,
+            'i18n',
+            'geo_import_en.qm'
+        )
+
+        locale_path_ckan_en = os.path.join(
             self.plugin_dir,
             'i18n',
             'CKANBrowser_en.qm'
         )
 
-        # 現在のロケール用の翻訳ファイルが存在しない場合は英語に切り替え
-        if not os.path.exists(locale_path):
+        # Choose which English fallback to use if present
+        if os.path.exists(locale_path_geo_en):
+            locale_path_en = locale_path_geo_en
+        else:
+            locale_path_en = locale_path_ckan_en
+
+        # Decide which file to use for the chosen locale
+        if os.path.exists(locale_path_geo):
+            locale_path = locale_path_geo
+        elif os.path.exists(locale_path_ckan):
+            locale_path = locale_path_ckan
+        else:
+            # current locale file not found -> fall back to English (try geo_import then CKANBrowser)
             locale = 'en'
-            locale_path = locale_path_en
+            if os.path.exists(locale_path_geo_en):
+                locale_path = locale_path_geo_en
+            else:
+                locale_path = locale_path_ckan_en
 
         # ロケールが英語でない場合、未翻訳要素用のフォールバックとして英語を追加でロード
         if locale != 'en':

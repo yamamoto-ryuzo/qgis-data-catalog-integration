@@ -91,7 +91,7 @@ def create_test_xml_files():
 if __name__ == "__main__":
     create_test_xml_files()
     print("\n🔄 XMLマージ機能のテスト:")
-    print("1. QGISでCKAN Browser Pluginを開いてください")
+    print("1. QGISでGeo Importプラグインを開いてください")
     print("2. 'test_xml_merge'フォルダを選択してください")  
     print("3. データをロードしてください")
     print("4. ✅ 結果の確認:")

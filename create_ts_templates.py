@@ -4,8 +4,8 @@
 import os
 import shutil
 
-i18n_dir = os.path.join(os.path.dirname(__file__), 'CKAN-Browser', 'i18n')
-base_ts = os.path.join(i18n_dir, 'CKANBrowser_en.ts')
+i18n_dir = os.path.join(os.path.dirname(__file__), 'qgis_data_catalog_integration', 'i18n')
+base_ts = os.path.join(i18n_dir, 'geo_import_en.ts')
 lang_codes = [
     ('en', 'en'),
     ('fr', 'fr'),
@@ -20,7 +20,7 @@ lang_codes = [
 ]
 
 for code, qtcode in lang_codes:
-    ts_name = f'CKANBrowser_{code}.ts'
+    ts_name = f'geo_import_{code}.ts'
     ts_path = os.path.join(i18n_dir, ts_name)
     if not os.path.exists(ts_path):
         # 英語雛形をコピーして新規作成

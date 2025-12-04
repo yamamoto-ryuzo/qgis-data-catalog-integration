@@ -111,7 +111,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
             # 読み込むJSONファイル（複数）
             instances_urls = [
                 'https://raw.githubusercontent.com/ckan/ckan-instances/gh-pages/config/instances.json',
-                'https://raw.githubusercontent.com/yamamoto-ryuzo/qgis-data-catalog-integration/refs/heads/main/resources/instances/instances.json'
+                'https://raw.githubusercontent.com/yamamoto-ryuzo/geo_import/refs/heads/main/resources/instances/instances.json'
             ]
             
             # ローカルのJSONファイルを追加（存在する場合）
