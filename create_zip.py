@@ -46,8 +46,11 @@ def move_to_trash(filepath):
         return True
 
 
-PLUGIN_DIR = 'qgis_data_catalog_integration'  # フォルダ名もPEP 8準拠に変更
-META_FILE = os.path.join(PLUGIN_DIR, 'metadata.txt')
+PLUGIN_DIR = 'qgis_data_catalog_integration'  # プラグインフォルダ名
+
+# META_FILE は作業ディレクトリからの相対パスで指定されることが多いため
+# 実行時にプラグインフォルダを探してフルパスを決定する。
+META_FILE = None
 ZIP_PREFIX = 'QGISDataCatalogIntegration_'
 
 # 配布に含めるファイル・ディレクトリ（必要に応じて追加）
@@ -70,7 +73,19 @@ def version_to_str(ver):
     return f'V{ver[0]}.{ver[1]}.{ver[2]}'
 
 def main():
+    # プラグインフォルダを検索（カレントとその下層を探索）
+    base_dir = None
+    if os.path.isdir(PLUGIN_DIR):
+        base_dir = PLUGIN_DIR
+    else:
+        for root, dirs, files in os.walk('.'):
+            if PLUGIN_DIR in dirs:
+                base_dir = os.path.join(root, PLUGIN_DIR)
+                break
+    if not base_dir:
+        raise FileNotFoundError(f"Plugin directory '{PLUGIN_DIR}' not found")
 
+    META_FILE = os.path.join(base_dir, 'metadata.txt')
 
     # metadata.txtからversion=行を直接パース
     with open(META_FILE, encoding='utf-8') as f:
@@ -101,13 +116,21 @@ def main():
 
     # 一時作業ディレクトリ作成
 
-    tmp_dir = f'{PLUGIN_DIR}_tmp_pack'
+    tmp_dir = f"{os.path.basename(base_dir)}_tmp_pack"
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)
     os.makedirs(tmp_dir)
 
     # 必要なファイル・ディレクトリを一時ディレクトリにコピー
+    # INCLUDE_FILES に登録された項目名のうち、PLUGiN_DIR は検出した base_dir に置き換える
+    items_to_copy = []
     for item in INCLUDE_FILES:
+        if item == PLUGIN_DIR:
+            items_to_copy.append(base_dir)
+        else:
+            items_to_copy.append(item)
+
+    for item in items_to_copy:
         if os.path.isdir(item):
             target_dir = os.path.join(tmp_dir, os.path.basename(item))
             shutil.copytree(item, target_dir)
