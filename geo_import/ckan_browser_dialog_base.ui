@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CKANBrowserDialogBase</class>
- <widget class="QDialog" name="CKANBrowserDialogBase">
+ <class>GeoImportDialogBase</class>
+ <widget class="QDialog" name="GeoImportDialogBase">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -684,7 +684,7 @@
   <connection>
    <sender>IDC_lineSearch</sender>
    <signal>textChanged(QString)</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>searchtextchanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -700,7 +700,7 @@
   <connection>
    <sender>IDC_listResults</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>resultitemchanged(QListWidgetItem*,QListWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -716,7 +716,7 @@
     <connection>
      <sender>IDC_bClearSelection</sender>
      <signal>clicked()</signal>
-     <receiver>CKANBrowserDialogBase</receiver>
+     <receiver>GeoImportDialogBase</receiver>
      <slot>clear_selection()</slot>
      <hints>
       <hint type="sourcelabel">
@@ -732,7 +732,7 @@
   <connection>
    <sender>IDC_bLoadResource</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>load_resource_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -748,7 +748,7 @@
   <connection>
    <sender>IDC_bClose</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>close_dlg()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -764,7 +764,7 @@
   <connection>
    <sender>IDC_listGroup</sender>
    <signal>itemChanged(QListWidgetItem*)</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>list_group_item_changed(QListWidgetItem, int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -780,7 +780,7 @@
   <connection>
    <sender>IDC_bSearch</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>suchen()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -796,7 +796,7 @@
   <connection>
    <sender>IDC_listGroup</sender>
    <signal>itemActivated(QListWidgetItem*)</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>category_item_clicked(QListWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -812,7 +812,7 @@
   <connection>
    <sender>pushButton</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>previous_page_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -828,7 +828,7 @@
   <connection>
    <sender>pushButton_2</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>next_page_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -844,7 +844,7 @@
   <connection>
    <sender>IDC_bListAll</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>list_all_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -860,7 +860,7 @@
   <connection>
    <sender>IDC_bDisclaimer</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>show_disclaimer()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -876,7 +876,7 @@
   <connection>
    <sender>pushButton_3</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>help_ttip_search()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -892,7 +892,7 @@
   <connection>
    <sender>pushButton_4</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>help_ttip_filter()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -908,7 +908,7 @@
   <connection>
    <sender>pushButton_5</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>help_ttip_data_list()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -924,7 +924,7 @@
   <connection>
    <sender>IDC_bCopy</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>copy_clipboard()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -940,7 +940,7 @@
   <connection>
    <sender>IDC_listRessources</sender>
    <signal>currentItemChanged(QListWidgetItem*,QListWidgetItem*)</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>resource_item_changed(QListWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -956,7 +956,7 @@
   <connection>
    <sender>pushButton_6</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>help_ttip_resource()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -972,7 +972,7 @@
   <connection>
    <sender>IDC_bSelectDataProvider</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogBase</receiver>
+   <receiver>GeoImportDialogBase</receiver>
    <slot>select_data_provider_clicked()</slot>
    <hints>
     <hint type="sourcelabel">

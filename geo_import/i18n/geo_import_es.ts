@@ -3,7 +3,7 @@
 <TS version="2.1" language="es_ES">
 <!-- Copied from CKANBrowser_es.ts -->
 <context>
-    <name>CKANBrowserDialogBase</name>
+    <name>GeoImportDialogBase</name>
     <message>
         <source>dlg_base_title</source>
         <translation>Navegador de Datos Abiertos (CKAN)</translation>

@@ -7,7 +7,7 @@
 - ✅ 設定: `qgisMinimumVersion=3.40` （QT6をサポート）
 - ✅ 設定: `qgisMaximumVersion=3.99`
 
-### 2. ckan_browser.pyの修正
+### 2. ckan_browser.py（geo_import メインファイル）の修正
 - ロケール取得時のエラー処理を追加（Noneチェック）
 - 重複したコードブロックを削除（Settings初期化が2回行われていた問題を修正）
 - QT5/QT6互換のためqgis.PyQtを使用

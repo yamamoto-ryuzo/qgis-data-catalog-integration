@@ -30,6 +30,6 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     # プラグインのメインクラスをロードして返す
-    # QGISインターフェースを受け取り、CKANBrowserインスタンスを初期化
-    from .ckan_browser import CKANBrowser
-    return CKANBrowser(iface)
+    # QGISインターフェースを受け取り、GeoImportインスタンスを初期化
+    from .ckan_browser import GeoImport
+    return GeoImport(iface)

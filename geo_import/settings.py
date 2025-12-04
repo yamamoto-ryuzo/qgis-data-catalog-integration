@@ -47,7 +47,7 @@ class Settings:
         # サーバリストはキャッシュフォルダに保存
         if not self.cache_dir:
             # デフォルトキャッシュディレクトリ
-            self.cache_dir = os.path.join(os.path.expanduser('~'), '.ckan_browser_cache')
+            self.cache_dir = os.path.join(os.path.expanduser('~'), '.geo_import_cache')
         if not os.path.exists(self.cache_dir):
             try:
                 os.makedirs(self.cache_dir, exist_ok=True)
@@ -105,7 +105,7 @@ class Settings:
         qgis_settings.setValue(self.KEY_LONG_PATH_SUPPORT, self.long_path_support)
         # サーバリストはキャッシュフォルダに保存
         if not self.cache_dir:
-            self.cache_dir = os.path.join(os.path.expanduser('~'), '.ckan_browser_cache')
+            self.cache_dir = os.path.join(os.path.expanduser('~'), '.geo_import_cache')
         if not os.path.exists(self.cache_dir):
             try:
                 os.makedirs(self.cache_dir, exist_ok=True)

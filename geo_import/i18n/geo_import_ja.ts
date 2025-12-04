@@ -2,7 +2,7 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ja_JP">
 <context>
-    <name>CKANBrowserDialogBase</name>
+    <name>GeoImportDialogBase</name>
     <message>
         <location filename="../ckan_browser_dialog_base.ui" line="35"/>
         <source>dlg_base_title</source>
@@ -173,7 +173,7 @@
     </message>
 </context>
 <context>
-    <name>CKANBrowserDialogDataProviders</name>
+    <name>GeoImportDialogDataProviders</name>
     <message>
         <location filename="../ckan_browser_dialog_dataproviders.ui" line="26"/>
         <source>dlg_dataproviders_title</source>
@@ -211,7 +211,7 @@
     </message>
 </context>
 <context>
-    <name>CKANBrowserDialogSettings</name>
+    <name>GeoImportDialogSettings</name>
     <message>
         <location filename="../ckan_browser_dialog_settings.ui" line="26"/>
         <source>dlg_set_title</source>
@@ -294,7 +294,7 @@
     </message>
 </context>
 <context>
-    <name>CKANBrowserDisclaimer</name>
+    <name>GeoImportDialogDisclaimer</name>
     <message>
         <location filename="../ckan_browser_dialog_disclaimer.ui" line="32"/>
         <source>dlg_dsc_dlg_title</source>

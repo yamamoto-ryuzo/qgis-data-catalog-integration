@@ -2,13 +2,13 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsMessageLog, Qgis
-from .ckan_browser_dialog import CKANBrowserDialog
-from .ckan_browser_dialog_settings import CKANBrowserDialogSettings
+from .ckan_browser_dialog import GeoImportDialog
+from .ckan_browser_dialog_settings import GeoImportDialogSettings
 import os.path
 from .settings import Settings
 from .util import Util
 
-class CKANBrowser:
+class GeoImport:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -22,7 +22,7 @@ class CKANBrowser:
         # 設定を初期化
         self.settings = Settings()
         QgsMessageLog.logMessage('__init__', self.settings.DLG_CAPTION, Qgis.Info)
-        QSettings().setValue("ckan_browser/isopen", False)
+        QSettings().setValue("geo_import/isopen", False)
         self.iface = iface
 
         # プラグインディレクトリを初期化
@@ -36,13 +36,13 @@ class CKANBrowser:
         else:
             locale = 'en'
         QgsMessageLog.logMessage(u'locale: {}'.format(locale), self.settings.DLG_CAPTION, Qgis.Info)
-        # Try new naming `geo_import_*.qm` first, fall back to legacy `CKANBrowser_*.qm`.
+        # Use geo_import_*.qm naming convention
         locale_path_geo = os.path.join(
             self.plugin_dir,
             'i18n',
             'geo_import_{}.qm'.format(locale))
 
-        locale_path_ckan = os.path.join(
+        locale_path_legacy = os.path.join(
             self.plugin_dir,
             'i18n',
             'CKANBrowser_{}.qm'.format(locale))
@@ -53,7 +53,7 @@ class CKANBrowser:
             'geo_import_en.qm'
         )
 
-        locale_path_ckan_en = os.path.join(
+        locale_path_legacy_en = os.path.join(
             self.plugin_dir,
             'i18n',
             'CKANBrowser_en.qm'
@@ -63,20 +63,20 @@ class CKANBrowser:
         if os.path.exists(locale_path_geo_en):
             locale_path_en = locale_path_geo_en
         else:
-            locale_path_en = locale_path_ckan_en
+            locale_path_en = locale_path_legacy_en
 
         # Decide which file to use for the chosen locale
         if os.path.exists(locale_path_geo):
             locale_path = locale_path_geo
-        elif os.path.exists(locale_path_ckan):
-            locale_path = locale_path_ckan
+        elif os.path.exists(locale_path_legacy):
+            locale_path = locale_path_legacy
         else:
-            # current locale file not found -> fall back to English (try geo_import then CKANBrowser)
+            # current locale file not found -> fall back to English
             locale = 'en'
             if os.path.exists(locale_path_geo_en):
                 locale_path = locale_path_geo_en
             else:
-                locale_path = locale_path_ckan_en
+                locale_path = locale_path_legacy_en
 
         # ロケールが英語でない場合、未翻訳要素用のフォールバックとして英語を追加でロード
         if locale != 'en':
@@ -198,7 +198,7 @@ class CKANBrowser:
         
         self.add_action(
             icon_settings,
-            text=self.util.tr(u'ckan_browser_settings'),
+            text=self.util.tr(u'geo_import_settings'),
             callback=self.open_settings,
             parent=self.iface.mainWindow()
         )
@@ -217,7 +217,7 @@ class CKANBrowser:
         # プラグインのメイン処理を実行
         
         # ダイアログが既に開いているかチェック
-        is_open = QSettings().value("ckan_browser/isopen", False)
+        is_open = QSettings().value("geo_import/isopen", False)
         #Python treats almost everything as True````
         #is_open = bool(is_open)
         self.util.msg_log_debug(u'isopen: {0}'.format(is_open))
@@ -235,7 +235,7 @@ class CKANBrowser:
         dir_check = self.util.check_dir(self.settings.cache_dir)
         api_url_check = self.util.check_api_url(self.settings.ckan_url)
         if dir_check is False or api_url_check is False:
-            dlg = CKANBrowserDialogSettings(self.settings, self.iface, self.iface.mainWindow())
+            dlg = GeoImportDialogSettings(self.settings, self.iface, self.iface.mainWindow())
             dlg.show()
             result = dlg.exec()
             if result != 1:
@@ -244,8 +244,8 @@ class CKANBrowser:
 #         self.util.msg_log('cache_dir: {0}'.format(self.settings.cache_dir))
 
         try:
-            QSettings().setValue("ckan_browser/isopen", True)
-            self.dlg = CKANBrowserDialog(self.settings, self.iface, self.iface.mainWindow())
+            QSettings().setValue("geo_import/isopen", True)
+            self.dlg = GeoImportDialog(self.settings, self.iface, self.iface.mainWindow())
 
             # show the dialog
             self.dlg.show()
@@ -256,10 +256,10 @@ class CKANBrowser:
             if result:
                 pass
         finally:
-            QSettings().setValue("ckan_browser/isopen", False)
+            QSettings().setValue("geo_import/isopen", False)
 
     def open_settings(self):
         # 設定ダイアログを開く
-        dlg = CKANBrowserDialogSettings(self.settings, self.iface, self.iface.mainWindow())
+        dlg = GeoImportDialogSettings(self.settings, self.iface, self.iface.mainWindow())
         dlg.show()
         dlg.exec()

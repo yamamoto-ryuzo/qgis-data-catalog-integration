@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CKANBrowserDialogDataProviders</class>
- <widget class="QDialog" name="CKANBrowserDialogDataProviders">
+ <class>GeoImportDialogDataProviders</class>
+ <widget class="QDialog" name="GeoImportDialogDataProviders">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -158,7 +158,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CKANBrowserDialogDataProviders</receiver>
+   <receiver>GeoImportDialogDataProviders</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -174,7 +174,7 @@
   <connection>
    <sender>lineEdit</sender>
    <signal>textChanged(QString)</signal>
-   <receiver>CKANBrowserDialogDataProviders</receiver>
+   <receiver>GeoImportDialogDataProviders</receiver>
    <slot>searchTermChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -190,7 +190,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CKANBrowserDialogDataProviders</receiver>
+   <receiver>GeoImportDialogDataProviders</receiver>
    <slot>save_btn_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -206,7 +206,7 @@
   <connection>
    <sender>IDC_bTestConnection</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogDataProviders</receiver>
+   <receiver>GeoImportDialogDataProviders</receiver>
    <slot>btn_clicked_test_connection()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -222,7 +222,7 @@
   <connection>
    <sender>IDC_bAddConnection</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogDataProviders</receiver>
+   <receiver>GeoImportDialogDataProviders</receiver>
    <slot>btn_clicked_add_connection()</slot>
    <hints>
     <hint type="sourcelabel">

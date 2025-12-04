@@ -50,7 +50,7 @@
         <source>Number of instances</source>
         <translation>इंस्टेंस की संख्या</translation>
     </message>
-    <name>CKANBrowserDialogBase</name>
+    <name>GeoImportDialogBase</name>
     <message>
         <source>dlg_base_title</source>
         <translation>ओपन डेटा (CKAN) ब्राउज़र</translation>

@@ -2,7 +2,7 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>CKANBrowserDialogBase</name>
+    <name>GeoImportDialogBase</name>
     <message>
         <location filename="../ckan_browser_dialog_base.ui" line="35"/>
         <source>dlg_base_title</source>

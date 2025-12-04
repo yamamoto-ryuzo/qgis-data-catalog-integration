@@ -50,7 +50,7 @@
         <source>Number of instances</source>
         <translation>Количество экземпляров</translation>
     </message>
-    <name>CKANBrowserDialogBase</name>
+    <name>GeoImportDialogBase</name>
     <message>
         <source>dlg_base_title</source>
         <translation>Браузер открытых данных (CKAN)</translation>

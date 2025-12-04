@@ -46,12 +46,12 @@ def move_to_trash(filepath):
         return True
 
 
-PLUGIN_DIR = 'qgis_data_catalog_integration'  # プラグインフォルダ名
+PLUGIN_DIR = 'geo_import'  # プラグインフォルダ名（変更: geo_import を使う）
 
 # META_FILE は作業ディレクトリからの相対パスで指定されることが多いため
 # 実行時にプラグインフォルダを探してフルパスを決定する。
 META_FILE = None
-ZIP_PREFIX = 'QGISDataCatalogIntegration_'
+ZIP_PREFIX = 'geo_import_'
 
 # 配布に含めるファイル・ディレクトリ（必要に応じて追加）
 INCLUDE_FILES = [
@@ -73,7 +73,8 @@ def version_to_str(ver):
     return f'V{ver[0]}.{ver[1]}.{ver[2]}'
 
 def main():
-    # プラグインフォルダを検索（カレントとその下層を探索）
+    # プラグインフォルダを検索（指定名を優先）。見つからない場合は
+    # サブディレクトリ内にある `metadata.txt` を持つ最初のディレクトリをフォールバックで使う。
     base_dir = None
     if os.path.isdir(PLUGIN_DIR):
         base_dir = PLUGIN_DIR
@@ -82,8 +83,19 @@ def main():
             if PLUGIN_DIR in dirs:
                 base_dir = os.path.join(root, PLUGIN_DIR)
                 break
+
     if not base_dir:
-        raise FileNotFoundError(f"Plugin directory '{PLUGIN_DIR}' not found")
+        # フォールバック: サブディレクトリにあるmetadata.txtを探す
+        for root, dirs, files in os.walk('.'):
+            # ルートのmetadata.txt（ワークスペース直下）は無視し、サブディレクトリを優先
+            if root in ('.', './'):
+                continue
+            if 'metadata.txt' in files:
+                base_dir = root
+                break
+
+    if not base_dir:
+        raise FileNotFoundError(f"Plugin directory '{PLUGIN_DIR}' not found and no subdirectory containing metadata.txt found")
 
     META_FILE = os.path.join(base_dir, 'metadata.txt')
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CKANBrowserDialogSettings</class>
- <widget class="QDialog" name="CKANBrowserDialogSettings">
+ <class>GeoImportDialogSettings</class>
+ <widget class="QDialog" name="GeoImportDialogSettings">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -271,7 +271,7 @@
   <connection>
    <sender>IDC_bSave</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogSettings</receiver>
+   <receiver>GeoImportDialogSettings</receiver>
    <slot>save()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -287,7 +287,7 @@
   <connection>
    <sender>IDC_bCancel</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogSettings</receiver>
+   <receiver>GeoImportDialogSettings</receiver>
    <slot>cancel()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -303,7 +303,7 @@
   <connection>
    <sender>IDC_bCacheDir</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogSettings</receiver>
+   <receiver>GeoImportDialogSettings</receiver>
    <slot>select_cache_dir()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -319,7 +319,7 @@
   <connection>
    <sender>IDC_pbHelpCache</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogSettings</receiver>
+   <receiver>GeoImportDialogSettings</receiver>
    <slot>help_cache_dir()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -335,7 +335,7 @@
   <connection>
    <sender>IDC_bAuthCfgClear</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogSettings</receiver>
+   <receiver>GeoImportDialogSettings</receiver>
    <slot>authcfg_clear()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -351,7 +351,7 @@
   <connection>
    <sender>IDC_bAuthCfgEdit</sender>
    <signal>clicked()</signal>
-   <receiver>CKANBrowserDialogSettings</receiver>
+   <receiver>GeoImportDialogSettings</receiver>
    <slot>authcfg_edit()</slot>
    <hints>
     <hint type="sourcelabel">

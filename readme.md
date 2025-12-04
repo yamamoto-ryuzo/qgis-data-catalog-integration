@@ -146,7 +146,7 @@ You can search and download datasets from CKAN and other open data portals and u
 
 - 全体構成:
     - <cache_dir>/<safe_host>_<hash>/<safe_package>_<package_id>/<safe_resource>_<resource_id>/<file>
-    - `cache_dir` はプラグイン設定(`ckan_browser/cache_dir`)で指定されたディレクトリ。未設定時の既定値は `~/.ckan_browser_cache`（キャッシュDB作成処理では環境により `Downloads/Catalog Integration` にフォールバックする場合があります）。
+    - `cache_dir` はプラグイン設定(`geo_import/cache_dir`)で指定されたディレクトリ。未設定時の既定値は `~/.geo_import_cache`（キャッシュDB作成処理では環境により `Downloads/Catalog Integration` にフォールバックする場合があります）。
         - `safe_host` は CKAN API URL のホスト部分（例: `catalog.data.metro.tokyo.lg.jp`）をファイル名に安全化した文字列。
         - `hash` はサーバーURL全体の SHA1 ハッシュの先頭8文字で、同一ホスト上でパスやポートが異なる複数インスタンスを区別するために付与されます。
         - `safe_package` はパッケージの `title`（無ければ `name`）を safe 化した文字列。
@@ -160,7 +160,7 @@ You can search and download datasets from CKAN and other open data portals and u
 
 - 例:
     - サーバー `https://catalog.data.metro.tokyo.lg.jp/api/3/`、パッケージ `人口統計 2019`（id=`42b6...`）、リソース `population-csv`（id=`d5ea...`）で CSV を取得すると:
-        - `~/.ckan_browser_cache/catalog.data.metro.tokyo.lg.jp_1a2b3c4d/人口統計_42b6.../population-csv_d5ea.../population.csv`
+        - `~/.geo_import_cache/catalog.data.metro.tokyo.lg.jp_1a2b3c4d/人口統計_42b6.../population-csv_d5ea.../population.csv`
 
 このルールにより、同じホスト内の複数インスタンスや同名パッケージ・リソースの衝突を避けつつ、人間にも判別しやすいフォルダ構成を実現しています。
 

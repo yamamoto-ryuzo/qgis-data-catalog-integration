@@ -40,10 +40,10 @@ FORM_CLASS, _ = uic.loadUiType(
 )
 
 
-class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
+class GeoImportDialogDataProviders(QDialog, FORM_CLASS):
     def __init__(self, settings, parent=None):
         """Constructor."""
-        super(CKANBrowserDialogDataProviders, self).__init__(parent)
+        super(GeoImportDialogDataProviders, self).__init__(parent)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
@@ -85,7 +85,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
         # self.list_model.setHorizontalHeaderLabels(['CKAN Servers'])
         self.servers = []
         self.row_server_selected_in_list = -1
-        self.util.msg_log_debug('CKANBrowserDialogDataProviders constructor')
+        self.util.msg_log_debug('GeoImportDialogDataProviders constructor')
         # self.IDC_grpManualDataProvider.collapsed = True
         # self.IDC_grpManualDataProvider.setCollapsed(True)
         #self.IDC_listProviders.setStyleSheet("QListWidget::item { border-bottom: 1px solid black; }");

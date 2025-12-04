@@ -50,7 +50,7 @@
         <source>Number of instances</source>
         <translation>Numero di istanze</translation>
     </message>
-    <name>CKANBrowserDialogBase</name>
+    <name>GeoImportDialogBase</name>
     <message>
         <source>dlg_base_title</source>
         <translation>Catalog Integration</translation>

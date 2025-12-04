@@ -123,8 +123,8 @@ from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt import QtGui, uic
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import QApplication, QListWidgetItem, QDialog, QMessageBox
-from .ckan_browser_dialog_disclaimer import CKANBrowserDialogDisclaimer
-from .ckan_browser_dialog_dataproviders import CKANBrowserDialogDataProviders
+from .ckan_browser_dialog_disclaimer import GeoImportDialogDisclaimer
+from .ckan_browser_dialog_dataproviders import GeoImportDialogDataProviders
 from .pyperclip import copy
 from .ckanconnector import CkanConnector
 from .util import Util
@@ -134,7 +134,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ckan_browser_dialog_base.ui'))
 
 
-class CKANBrowserDialog(QDialog, FORM_CLASS):
+class GeoImportDialog(QDialog, FORM_CLASS):
     # メインダイアログクラス - データカタログのブラウズと検索を管理
     
     def on_IDC_bSelectAllResources_clicked(self):
@@ -236,7 +236,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
 
     def __init__(self, settings, iface, parent=None):
         """Constructor."""
-        super(CKANBrowserDialog, self).__init__(parent)
+        super(GeoImportDialog, self).__init__(parent)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
@@ -276,8 +276,8 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         self.timer.timeout.connect(self.window_loaded)
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         # don't initialized dialogs here, WaitCursor would be set several times
-        # self.dlg_disclaimer = CKANBrowserDialogDisclaimer(self.settings)
-        # self.dlg_dataproviders = CKANBrowserDialogDataProviders(self.settings, self.util)
+        # self.dlg_disclaimer = GeoImportDialogDisclaimer(self.settings)
+        # self.dlg_dataproviders = GeoImportDialogDataProviders(self.settings, self.util)
 
         # --- 追加: SQLite再取得ボタンのシグナル接続 ---
         if hasattr(self, 'IDC_bRefreshSqlite'):
@@ -1111,7 +1111,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
         QDialog.reject(self)
 
     def show_disclaimer(self):
-        self.dlg_disclaimer = CKANBrowserDialogDisclaimer(self.settings)
+        self.dlg_disclaimer = GeoImportDialogDisclaimer(self.settings)
         self.dlg_disclaimer.show()
 
     def searchtextchanged(self, search_txt):
@@ -1139,7 +1139,7 @@ class CKANBrowserDialog(QDialog, FORM_CLASS):
 
     def select_data_provider_clicked(self):
         self.util.msg_log_debug('select data provider clicked')
-        self.dlg_dataproviders = CKANBrowserDialogDataProviders(self.settings)
+        self.dlg_dataproviders = GeoImportDialogDataProviders(self.settings)
         self.dlg_dataproviders.show()
         if self.dlg_dataproviders.exec():
             QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)

@@ -2,7 +2,7 @@ import os
 import shutil
 
 root = os.path.dirname(os.path.dirname(__file__))
-i18n_dir = os.path.join(root, 'qgis_data_catalog_integration', 'i18n')
+i18n_dir = os.path.join(root, 'geo_import', 'i18n')
 
 if not os.path.isdir(i18n_dir):
     print('i18n directory not found:', i18n_dir)

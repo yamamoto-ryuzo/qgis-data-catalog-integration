@@ -50,7 +50,7 @@
         <source>Number of instances</source>
         <translation>实例数量</translation>
     </message>
-    <name>CKANBrowserDialogBase</name>
+    <name>GeoImportDialogBase</name>
     <message>
         <source>dlg_base_title</source>
         <translation>开放数据（CKAN）浏览器</translation>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CKANBrowserDisclaimer</class>
- <widget class="QDialog" name="CKANBrowserDisclaimer">
+ <class>GeoImportDialogDisclaimer</class>
+ <widget class="QDialog" name="GeoImportDialogDisclaimer">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -91,7 +91,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>CKANBrowserDisclaimer</receiver>
+   <receiver>GeoImportDialogDisclaimer</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -107,7 +107,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>CKANBrowserDisclaimer</receiver>
+   <receiver>GeoImportDialogDisclaimer</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

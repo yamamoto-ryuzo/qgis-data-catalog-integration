@@ -35,10 +35,10 @@ FORM_CLASS, _ = uic.loadUiType(
 )
 
 
-class CKANBrowserDialogDisclaimer(QDialog, FORM_CLASS):
+class GeoImportDialogDisclaimer(QDialog, FORM_CLASS):
     def __init__(self, settings, parent=None):
         """Constructor."""
-        super(CKANBrowserDialogDisclaimer, self).__init__(parent)
+        super(GeoImportDialogDisclaimer, self).__init__(parent)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see

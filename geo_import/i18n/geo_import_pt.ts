@@ -50,7 +50,7 @@
         <source>Number of instances</source>
         <translation>Número de instâncias</translation>
     </message>
-    <name>CKANBrowserDialogBase</name>
+    <name>GeoImportDialogBase</name>
     <message>
         <source>dlg_base_title</source>
         <translation>Navegador de Dados Abertos (CKAN)</translation>
