@@ -119,7 +119,7 @@ class DataFetchThread(QThread):
 import math
 import os
 import sys
-from qgis.PyQt.QtCore import Qt, QTimer
+from qgis.PyQt.QtCore import Qt, QTimer, QCoreApplication
 from qgis.PyQt import QtGui, uic
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import QApplication, QListWidgetItem, QDialog, QMessageBox
@@ -136,6 +136,11 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class GeoImportDialog(QDialog, FORM_CLASS):
     # メインダイアログクラス - データカタログのブラウズと検索を管理
+    
+    @staticmethod
+    def tr(message):
+        """翻訳用のtr()メソッド"""
+        return QCoreApplication.translate('GeoImport', message)
     
     def on_IDC_bSelectAllResources_clicked(self):
         # 全リソース選択ボタンのクリックイベント処理

@@ -24,7 +24,7 @@ import json
 import os
 
 from qgis.PyQt import QtGui, uic
-from qgis.PyQt.QtCore import QTimer, Qt, QStringListModel, QModelIndex, QObject, pyqtSignal, QEvent
+from qgis.PyQt.QtCore import QTimer, Qt, QStringListModel, QModelIndex, QObject, pyqtSignal, QEvent, QCoreApplication
 from qgis.PyQt.QtGui import QStandardItemModel, QStandardItem, QColor
 from qgis.PyQt.QtWidgets import QDialog, QApplication, QListWidgetItem, QAction, QInputDialog, QLineEdit, QFileDialog
 from .ckanconnector import CkanConnector
@@ -41,6 +41,11 @@ FORM_CLASS, _ = uic.loadUiType(
 
 
 class GeoImportDialogDataProviders(QDialog, FORM_CLASS):
+    @staticmethod
+    def tr(message):
+        """翻訳用のtr()メソッド"""
+        return QCoreApplication.translate('GeoImport', message)
+    
     def __init__(self, settings, parent=None):
         """Constructor."""
         super(GeoImportDialogDataProviders, self).__init__(parent)

@@ -101,7 +101,7 @@
          <item>
           <widget class="QLabel" name="label_format">
            <property name="text">
-            <string>データ形式</string>
+            <string>Data Format</string>
            </property>
           </widget>
          </item>
@@ -109,7 +109,7 @@
           <widget class="QComboBox" name="IDC_comboFormat">
            <item>
             <property name="text">
-             <string>すべて</string>
+             <string>All</string>
             </property>
            </item>
            <item>
@@ -282,10 +282,10 @@
        <item>
         <widget class="QPushButton" name="IDC_bRefreshSqlite">
          <property name="toolTip">
-          <string>全データセットを再取得しSQLiteキャッシュを再作成します</string>
+          <string>Refresh all datasets and recreate SQLite cache</string>
          </property>
          <property name="text">
-          <string>SQLite再取得</string>
+          <string>Refresh SQLite</string>
          </property>
         </widget>
        </item>
@@ -367,17 +367,17 @@
    <item>
     <widget class="QPushButton" name="IDC_bClearSelection">
      <property name="text">
-      <string>選択クリア</string>
+      <string>Clear Selection</string>
      </property>
      <property name="toolTip">
-      <string>検索結果の選択をクリアします</string>
+      <string>Clear the selection of search results</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QPushButton" name="IDC_bSelectAllResources">
      <property name="text">
-      <string>全選択</string>
+      <string>Select All</string>
      </property>
     </widget>
    </item>

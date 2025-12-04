@@ -143,5 +143,48 @@
         <source>dlg_base_lbl_plugin_version</source>
         <translation>Plugin Version: {}</translation>
     </message>
+    <message>
+        <source>Data Format</source>
+        <translation>Data Format</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>All</translation>
+    </message>
+    <message>
+        <source>Refresh SQLite</source>
+        <translation>Refresh SQLite</translation>
+    </message>
+    <message>
+        <source>Refresh all datasets and recreate SQLite cache</source>
+        <translation>Refresh all datasets and recreate SQLite cache</translation>
+    </message>
+    <message>
+        <source>Clear Selection</source>
+        <translation>Clear Selection</translation>
+    </message>
+    <message>
+        <source>Clear the selection of search results</source>
+        <translation>Clear the selection of search results</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Select All</translation>
+    </message>
+</context>
+<context>
+    <name>GeoImport</name>
+    <message>
+        <source>&amp;geo_import</source>
+        <translation>&amp;Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import</source>
+        <translation>Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import_settings</source>
+        <translation>Geo Import Settings</translation>
+    </message>
 </context>
 </TS>

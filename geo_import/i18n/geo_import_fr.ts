@@ -478,5 +478,48 @@
         <source>py_dlg_data_providers_custom_server_name_exists</source>
         <translation>Un serveur avec ce nom existe déjà : {}</translation>
     </message>
+    <message>
+        <source>Data Format</source>
+        <translation>Format de données</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>Tous</translation>
+    </message>
+    <message>
+        <source>Refresh SQLite</source>
+        <translation>Actualiser SQLite</translation>
+    </message>
+    <message>
+        <source>Refresh all datasets and recreate SQLite cache</source>
+        <translation>Actualiser tous les jeux de données et recréer le cache SQLite</translation>
+    </message>
+    <message>
+        <source>Clear Selection</source>
+        <translation>Effacer la sélection</translation>
+    </message>
+    <message>
+        <source>Clear the selection of search results</source>
+        <translation>Effacer la sélection des résultats de recherche</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Tout sélectionner</translation>
+    </message>
+</context>
+<context>
+    <name>GeoImport</name>
+    <message>
+        <source>&amp;geo_import</source>
+        <translation>&amp;Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import</source>
+        <translation>Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import_settings</source>
+        <translation>Paramètres Geo Import</translation>
+    </message>
 </context>
 </TS>

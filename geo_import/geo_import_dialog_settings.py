@@ -22,7 +22,7 @@
 """
 
 import os
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, QCoreApplication
 from qgis.PyQt import QtGui, uic
 from qgis.PyQt.QtWidgets import QApplication, QDialog, QFileDialog, QVBoxLayout, QDialogButtonBox
 from collections import OrderedDict
@@ -41,6 +41,11 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 
 class GeoImportDialogSettings(QDialog, FORM_CLASS):
+    @staticmethod
+    def tr(message):
+        """翻訳用のtr()メソッド"""
+        return QCoreApplication.translate('GeoImport', message)
+    
     def __init__(self, settings, iface, parent=None):
         """Constructor."""
         super(GeoImportDialogSettings, self).__init__(parent)

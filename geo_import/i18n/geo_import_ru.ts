@@ -139,5 +139,48 @@
         <source>dlg_base_ttip_resource</source>
         <translation>URL выбранного ресурса</translation>
     </message>
+    <message>
+        <source>Data Format</source>
+        <translation>Формат данных</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>Все</translation>
+    </message>
+    <message>
+        <source>Refresh SQLite</source>
+        <translation>Обновить SQLite</translation>
+    </message>
+    <message>
+        <source>Refresh all datasets and recreate SQLite cache</source>
+        <translation>Обновить все наборы данных и пересоздать кэш SQLite</translation>
+    </message>
+    <message>
+        <source>Clear Selection</source>
+        <translation>Очистить выбор</translation>
+    </message>
+    <message>
+        <source>Clear the selection of search results</source>
+        <translation>Очистить выбор результатов поиска</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Выбрать все</translation>
+    </message>
+</context>
+<context>
+    <name>GeoImport</name>
+    <message>
+        <source>&amp;geo_import</source>
+        <translation>&amp;Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import</source>
+        <translation>Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import_settings</source>
+        <translation>Настройки Geo Import</translation>
+    </message>
 </context>
 </TS>

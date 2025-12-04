@@ -139,5 +139,48 @@
         <source>dlg_base_ttip_resource</source>
         <translation>所选资源的URL</translation>
     </message>
+    <message>
+        <source>Data Format</source>
+        <translation>数据格式</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>全部</translation>
+    </message>
+    <message>
+        <source>Refresh SQLite</source>
+        <translation>刷新SQLite</translation>
+    </message>
+    <message>
+        <source>Refresh all datasets and recreate SQLite cache</source>
+        <translation>刷新所有数据集并重新创建SQLite缓存</translation>
+    </message>
+    <message>
+        <source>Clear Selection</source>
+        <translation>清除选择</translation>
+    </message>
+    <message>
+        <source>Clear the selection of search results</source>
+        <translation>清除搜索结果的选择</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>全选</translation>
+    </message>
+</context>
+<context>
+    <name>GeoImport</name>
+    <message>
+        <source>&amp;geo_import</source>
+        <translation>&amp;Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import</source>
+        <translation>Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import_settings</source>
+        <translation>Geo Import 设置</translation>
+    </message>
 </context>
 </TS>

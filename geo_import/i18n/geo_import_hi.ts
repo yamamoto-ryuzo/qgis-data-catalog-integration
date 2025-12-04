@@ -139,5 +139,48 @@
         <source>dlg_base_ttip_resource</source>
         <translation>चयनित संसाधन का URL</translation>
     </message>
+    <message>
+        <source>Data Format</source>
+        <translation>डेटा प्रारूप</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>सभी</translation>
+    </message>
+    <message>
+        <source>Refresh SQLite</source>
+        <translation>SQLite रीफ्रेश करें</translation>
+    </message>
+    <message>
+        <source>Refresh all datasets and recreate SQLite cache</source>
+        <translation>सभी डेटासेट रीफ्रेश करें और SQLite कैश पुनः बनाएं</translation>
+    </message>
+    <message>
+        <source>Clear Selection</source>
+        <translation>चयन साफ़ करें</translation>
+    </message>
+    <message>
+        <source>Clear the selection of search results</source>
+        <translation>खोज परिणामों का चयन साफ़ करें</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>सभी चुनें</translation>
+    </message>
+</context>
+<context>
+    <name>GeoImport</name>
+    <message>
+        <source>&amp;geo_import</source>
+        <translation>&amp;Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import</source>
+        <translation>Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import_settings</source>
+        <translation>Geo Import सेटिंग्स</translation>
+    </message>
 </context>
 </TS>

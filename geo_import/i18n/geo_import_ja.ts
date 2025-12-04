@@ -532,5 +532,48 @@ BOXドライブはクラウドストレージのため、アクセスするま�
         <source>py_dlg_data_providers_custom_server_name_exists</source>
         <translation>同じ名前のカスタムサーバーが既に存在します</translation>
     </message>
+    <message>
+        <source>Data Format</source>
+        <translation>データ形式</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>すべて</translation>
+    </message>
+    <message>
+        <source>Refresh SQLite</source>
+        <translation>SQLite再取得</translation>
+    </message>
+    <message>
+        <source>Refresh all datasets and recreate SQLite cache</source>
+        <translation>全データセットを再取得しSQLiteキャッシュを再作成します</translation>
+    </message>
+    <message>
+        <source>Clear Selection</source>
+        <translation>選択クリア</translation>
+    </message>
+    <message>
+        <source>Clear the selection of search results</source>
+        <translation>検索結果の選択をクリアします</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>全選択</translation>
+    </message>
+</context>
+<context>
+    <name>GeoImport</name>
+    <message>
+        <source>&amp;geo_import</source>
+        <translation>&amp;Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import</source>
+        <translation>Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import_settings</source>
+        <translation>Geo Import 設定</translation>
+    </message>
 </context>
 </TS>

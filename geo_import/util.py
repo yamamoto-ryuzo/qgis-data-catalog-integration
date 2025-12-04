@@ -161,8 +161,7 @@ class Util:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        #return QCoreApplication.translate('CKANBrowser', message, None)
-        return QCoreApplication.translate('self.util', message, None)
+        return QCoreApplication.translate('GeoImport', message)
 
     def create_dir(self, dir_path):
         """

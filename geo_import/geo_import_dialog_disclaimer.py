@@ -24,6 +24,7 @@
 import os
 
 from qgis.PyQt import QtGui, uic
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtWidgets import QDialog
 from .util import Util
 
@@ -36,6 +37,11 @@ FORM_CLASS, _ = uic.loadUiType(
 
 
 class GeoImportDialogDisclaimer(QDialog, FORM_CLASS):
+    @staticmethod
+    def tr(message):
+        """翻訳用のtr()メソッド"""
+        return QCoreApplication.translate('GeoImport', message)
+    
     def __init__(self, settings, parent=None):
         """Constructor."""
         super(GeoImportDialogDisclaimer, self).__init__(parent)

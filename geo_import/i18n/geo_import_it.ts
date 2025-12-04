@@ -139,5 +139,48 @@
         <source>dlg_base_ttip_resource</source>
         <translation>URL della risorsa selezionata</translation>
     </message>
+    <message>
+        <source>Data Format</source>
+        <translation>Formato dati</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>Tutti</translation>
+    </message>
+    <message>
+        <source>Refresh SQLite</source>
+        <translation>Aggiorna SQLite</translation>
+    </message>
+    <message>
+        <source>Refresh all datasets and recreate SQLite cache</source>
+        <translation>Aggiorna tutti i set di dati e ricrea la cache SQLite</translation>
+    </message>
+    <message>
+        <source>Clear Selection</source>
+        <translation>Cancella selezione</translation>
+    </message>
+    <message>
+        <source>Clear the selection of search results</source>
+        <translation>Cancella la selezione dei risultati di ricerca</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Seleziona tutto</translation>
+    </message>
+</context>
+<context>
+    <name>GeoImport</name>
+    <message>
+        <source>&amp;geo_import</source>
+        <translation>&amp;Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import</source>
+        <translation>Geo Import</translation>
+    </message>
+    <message>
+        <source>geo_import_settings</source>
+        <translation>Impostazioni Geo Import</translation>
+    </message>
 </context>
 </TS>
