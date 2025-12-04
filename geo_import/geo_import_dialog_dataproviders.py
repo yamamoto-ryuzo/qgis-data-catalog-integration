@@ -44,10 +44,9 @@ class GeoImportDialogDataProviders(QDialog, FORM_CLASS):
     def __init__(self, settings, parent=None):
         """Constructor."""
         super(GeoImportDialogDataProviders, self).__init__(parent)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
+        # Qt Designerで作成したUIファイルからユーザーインターフェースを設定
+        # setupUi実行後は、self.<オブジェクト名>でDesignerのオブジェクトにアクセス可能
+        # 自動接続スロットも利用可能
         # #widgets-and-dialogs-with-auto-connect
         self.setModal(True)
         self.setupUi(self)

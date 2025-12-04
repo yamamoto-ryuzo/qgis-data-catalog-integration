@@ -18,14 +18,15 @@ class CkanConnector:
     """CKAN Connector"""
 
     def __init__(self, settings, util):
-        # 設定とユーティリティを初期化
+        # 設定とユーティリティクラスを初期化
+        # CKANサーバーとの通信やローカルデータベースへのアクセスを管理
         self.settings = settings
         self.settings.load()
         self.util = util
-        # ソート順序を設定
+        # ソート順序を設定（名前の昇順）
         self.sort = 'name asc'
         self.mb_downloaded = 0
-        # Chrome風のユーザーエージェント設定
+        # Chrome風のユーザーエージェント設定（CKAN APIへのHTTPリクエストで使用）
         self.ua_chrome = {
             b'Accept': b'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             # DON'T use: haven't found a way to tell QNetworkRequest to decompress on the fly

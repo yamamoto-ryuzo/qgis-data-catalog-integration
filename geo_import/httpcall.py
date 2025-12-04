@@ -36,6 +36,7 @@ class HttpCall:
     """
 
     def __init__(self, settings, util):
+        # 設定とユーティリティクラスのインスタンスを保持
         assert isinstance(settings, Settings)
         assert isinstance(util, Util)
         self.settings = settings
@@ -43,7 +44,7 @@ class HttpCall:
         self.reply = None
 
     # Qt5 / Qt6 の違いで QNetworkReply のエラー定数が名前空間化されている場合があるため
-    # ここで互換性用の定数を解決しておく
+    # ここで互換性用の定数を解決しておく（Qt5/Qt6対応）
     try:
         QNR_NO_ERROR = QNetworkReply.NoError
         QNR_TIMEOUT_ERROR = QNetworkReply.TimeoutError
@@ -65,27 +66,27 @@ class HttpCall:
         """
         Uses QgsNetworkAccessManager and QgsAuthManager.
         """
+        # HTTPメソッドを取得（デフォルトはget）
         method = kwargs.get('http_method', 'get')
 
         headers = kwargs.get('headers', {})
-        # This fixes a weird error with compressed content not being correctly
-        # inflated.
-        # If you set the header on the QNetworkRequest you are basically telling
-        # QNetworkAccessManager "I know what I'm doing, please don't do any content
-        # encoding processing".
-        # See: https://bugs.webkit.org/show_bug.cgi?id=63696#c1
+        # 圧縮コンテンツが正しく展開されない問題を修正
+        # QNetworkRequestにこのヘッダーを設定すると、QNetworkAccessManagerに
+        # 「自分で処理するからコンテンツエンコーディング処理はしないでください」と伝えることになる
+        # 参照: https://bugs.webkit.org/show_bug.cgi?id=63696#c1
         try:
             del headers[b'Accept-Encoding']
         except KeyError as ke:
-            # only debugging here as after 1st remove it isn't there anymore
+            # 1回目の削除後は存在しないため、デバッグレベルでログ出力
             self.util.msg_log_debug(u'unexpected error deleting request header: {}'.format(ke))
             pass
 
-        # Avoid double quoting form QUrl
+        # QUrlによる二重クォートを回避
         url = unquote(url)
 
         self.util.msg_log_debug(u'http_call request: {} {}'.format(method, url))
 
+        # レスポンスオブジェクトの定義
         class Response:
             status_code = 200
             status_message = 'OK'
@@ -101,10 +102,11 @@ class HttpCall:
         self.http_call_result = Response()
         url = self.util.remove_newline(url)
 
+        # ネットワークリクエストを作成
         req = QNetworkRequest()
         req.setUrl(QUrl(url))
         # FollowRedirectsAttribute は Qt のバージョンで存在しない場合があるため
-        # 存在チェックしてから設定する（存在しなければ無視する）
+        # 存在チェックしてから設定する（Qt5/Qt6互換性のため）
         try:
             attr_ns = getattr(QNetworkRequest, 'Attribute', None)
             if attr_ns is not None and hasattr(attr_ns, 'FollowRedirectsAttribute'):

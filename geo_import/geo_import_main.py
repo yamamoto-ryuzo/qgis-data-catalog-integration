@@ -19,13 +19,13 @@ class GeoImport:
             application at run time.
         :type iface: QgsInterface
         """
-        # 設定を初期化
+        # 設定クラスを初期化して、プラグイン全体で使用する設定を管理
         self.settings = Settings()
         QgsMessageLog.logMessage('__init__', self.settings.DLG_CAPTION, Qgis.Info)
         QSettings().setValue("geo_import/isopen", False)
         self.iface = iface
 
-        # プラグインディレクトリを初期化
+        # プラグインディレクトリを初期化し、リソースファイルのパスを構築
         self.plugin_dir = os.path.dirname(__file__)
         QgsMessageLog.logMessage(u'plugin directory: {}'.format(self.plugin_dir), self.settings.DLG_CAPTION, Qgis.Info)
 
@@ -157,7 +157,7 @@ class GeoImport:
             added to self.actions list.
         :rtype: QAction
         """
-
+        # アイコンとアクションを作成し、ツールバーやメニューに追加
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -170,9 +170,11 @@ class GeoImport:
             action.setWhatsThis(whats_this)
 
         if add_to_toolbar:
+            # ツールバーにアクションを追加
             self.toolbar.addAction(action)
 
         if add_to_menu:
+            # プラグインメニューにアクションを追加
             self.iface.addPluginToMenu(
                 self.menu,
                 action)
@@ -205,7 +207,8 @@ class GeoImport:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
-        # QGISのGUIからプラグインメニュー項目とアイコンを削除
+        # QGISのGUIからプラグインメニュー項目とアイコンを削除する
+        # 全てのアクションをメニューとツールバーから削除
         for action in self.actions:
             self.iface.removePluginMenu(
                 self.util.tr(u'&geo_import'),
@@ -214,16 +217,16 @@ class GeoImport:
 
     def run(self):
         """Run method that performs all the real work"""
-        # プラグインのメイン処理を実行
+        # プラグインのメイン処理を実行する
+        # データカタログブラウザダイアログを表示し、ユーザーがデータを検索・追加できるようにする
         
-        # ダイアログが既に開いているかチェック
+        # ダイアログが既に開いているかチェック（二重起動防止）
         is_open = QSettings().value("geo_import/isopen", False)
-        #Python treats almost everything as True````
-        #is_open = bool(is_open)
+        # Pythonはほとんど全てをTrueとして扱うため、明示的にboolに変換
         self.util.msg_log_debug(u'isopen: {0}'.format(is_open))
         
-        #!!!string comparison - Windows and Linux treat it as string, Mac as bool
-        # so we convert string to bool
+        # 文字列比較 - WindowsとLinuxは文字列として、Macはboolとして扱うため
+        # 文字列をboolに変換する
         if isinstance(is_open, str):
             is_open = self.util.str2bool(is_open)
         

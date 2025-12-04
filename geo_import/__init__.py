@@ -30,6 +30,6 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     # プラグインのメインクラスをロードして返す
-    # QGISインターフェースを受け取り、GeoImportインスタンスを初期化
+    # QGISインターフェースを受け取り、GeoImportインスタンスを初期化する
     from .geo_import_main import GeoImport
     return GeoImport(iface)
