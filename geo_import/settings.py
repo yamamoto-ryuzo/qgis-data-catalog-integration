@@ -21,7 +21,7 @@ class Settings:
         self.cache_dir = None
         self.boxdrive_support = True  # BoxDriveサポートを有効化
         self.long_path_support = True  # 長いパス名対応を有効化
-        self.DLG_CAPTION = u'データカタログ統合'  # 'Catalog Integration'
+        self.DLG_CAPTION = u'geo_import'
         self.KEY_CACHE_DIR = 'geo_import/cache_dir'
         self.KEY_CKAN_API = 'geo_import/ckan_api'
         self.KEY_AUTHCFG = 'geo_import/authcfg'

@@ -123,15 +123,15 @@ from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt import QtGui, uic
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import QApplication, QListWidgetItem, QDialog, QMessageBox
-from .ckan_browser_dialog_disclaimer import GeoImportDialogDisclaimer
-from .ckan_browser_dialog_dataproviders import GeoImportDialogDataProviders
+from .geo_import_dialog_disclaimer import GeoImportDialogDisclaimer
+from .geo_import_dialog_dataproviders import GeoImportDialogDataProviders
 from .pyperclip import copy
 from .ckanconnector import CkanConnector
 from .util import Util
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'ckan_browser_dialog_base.ui'))
+    os.path.dirname(__file__), 'geo_import_dialog_base.ui'))
 
 
 class GeoImportDialog(QDialog, FORM_CLASS):

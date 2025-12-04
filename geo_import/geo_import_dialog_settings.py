@@ -37,7 +37,7 @@ except ImportError:
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'ckan_browser_dialog_settings.ui'))
+    os.path.dirname(__file__), 'geo_import_dialog_settings.ui'))
 
 
 class GeoImportDialogSettings(QDialog, FORM_CLASS):

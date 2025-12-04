@@ -30,7 +30,7 @@ from .util import Util
 FORM_CLASS, _ = uic.loadUiType(
     os.path.join(
         os.path.dirname(__file__),
-        'ckan_browser_dialog_disclaimer.ui'
+        'geo_import_dialog_disclaimer.ui'
     )
 )
 

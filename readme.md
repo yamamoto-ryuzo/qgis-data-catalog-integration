@@ -166,7 +166,7 @@ You can search and download datasets from CKAN and other open data portals and u
 
 
 ## 主な改修PYファイル / Main Modified Python Files
-- `ckan_browser_dialog.py`（UI・検索・カテゴリ・リソース処理）
+- `geo_import_dialog.py`（UI・検索・カテゴリ・リソース処理）
     - UI, search, category, resource handling
 - `util.py`（CSV自動判定・レイヤ追加・各種ユーティリティ）
     - CSV auto-detection, layer addition, utilities

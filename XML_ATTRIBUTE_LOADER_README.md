@@ -192,7 +192,7 @@ XMLローダーは以下のフィールドを自動生成します：
   - MLIT XML形式の特別処理
 - `mlit_xml_checker.py`: MLIT XML形式の診断ツール
 - `util.py`: データロード機能でXMLファイルの処理を統合（`_process_xml_files()`メソッド）
-- `ckan_browser_dialog.py`: メインダイアログ（XMLは通常のデータロードで処理）
+- `geo_import_dialog.py`: メインダイアログ（XMLは通常のデータロードで処理）
 
 ### 統合されたワークフロー
 XMLファイルは `util.py` の `add_lyrs_from_dir()` メソッドで自動的に検出され、複数ファイルのマージ機能で処理されます：

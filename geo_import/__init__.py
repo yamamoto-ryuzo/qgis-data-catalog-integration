@@ -31,5 +31,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     # プラグインのメインクラスをロードして返す
     # QGISインターフェースを受け取り、GeoImportインスタンスを初期化
-    from .ckan_browser import GeoImport
+    from .geo_import_main import GeoImport
     return GeoImport(iface)
