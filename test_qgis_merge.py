@@ -92,7 +92,7 @@ def create_simple_merge_test():
 if __name__ == "__main__":
     create_simple_merge_test()
     print("\n🎯 QGISマージ機能テスト:")
-    print("1. QGISでCKAN Browser Pluginを開いてください")
+    print("1. QGISでGeo Importプラグインを開いてください")
     print("2. 'test_qgis_merge'フォルダを選択してください")
     print("3. データをロードしてください")
     print("4. ✅ 期待される結果:")

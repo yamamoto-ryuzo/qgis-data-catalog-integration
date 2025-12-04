@@ -230,7 +230,7 @@ python test_xml_merge.py
 
 ### 手動テスト
 1. 複数のMLIT XMLファイルを同じフォルダに配置
-2. QGISでCKAN Browser Pluginを開く
+2. QGISでGeo Importプラグインを開く
 3. そのフォルダを選択してデータロード
 4. 同じタイプのファイルがマージされることを確認
 

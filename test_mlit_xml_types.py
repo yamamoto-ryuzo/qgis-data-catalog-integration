@@ -186,7 +186,7 @@ def create_mlit_test_xml_files():
 if __name__ == "__main__":
     create_mlit_test_xml_files()
     print("\n🎯 XMLタイプ別レイヤ名テスト:")
-    print("1. QGISでCKAN Browser Pluginを開いてください")
+    print("1. QGISでGeo Importプラグインを開いてください")
     print("2. 'test_mlit_xml_types'フォルダを選択してください")  
     print("3. データをロードしてください")
     print("4. ✅ 期待される結果:")
