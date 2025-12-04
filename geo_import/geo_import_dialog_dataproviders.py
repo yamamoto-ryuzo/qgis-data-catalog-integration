@@ -115,7 +115,8 @@ class GeoImportDialogDataProviders(QDialog, FORM_CLASS):
             # 読み込むJSONファイル（複数）
             instances_urls = [
                 'https://raw.githubusercontent.com/ckan/ckan-instances/gh-pages/config/instances.json',
-                'https://raw.githubusercontent.com/yamamoto-ryuzo/geo_import/refs/heads/main/resources/instances/instances.json'
+                # raw.githubusercontent.com expects the branch name directly (not refs/heads/)
+                'https://raw.githubusercontent.com/yamamoto-ryuzo/geo_import/main/resources/instances/instances.json'
             ]
             
             # ローカルのJSONファイルを追加（存在する場合）
@@ -128,7 +129,9 @@ class GeoImportDialogDataProviders(QDialog, FORM_CLASS):
             
             # すべてのサーバーのリスト
             self.servers = []
-            
+            # 取得失敗時の情報を集めてダイアログ表示できるようにする
+            fetch_failures = []
+
             for instances_url in instances_urls:
                 self.util.msg_log_debug('Getting instances from: ' + instances_url)
                 
@@ -159,21 +162,18 @@ class GeoImportDialogDataProviders(QDialog, FORM_CLASS):
                     self.util.msg_log_error(u'{}: {} {}'.format(response.status_code, response.status_message, response.reason))
                     continue  # 次のURLを処理
                 
-                try:
-                    json_txt = response.text.data().decode()
-                    self.util.msg_log_debug(u'resp_msg (decoded):\n{} .......'.format(json_txt[:255]))
-                    result = json.loads(json_txt)
-                    self.process_instances_result(result)
-                except TypeError as te:
-                    self.util.msg_log_error(u'unexpected TypeError: {0}'.format(te))
-                    continue
-                except AttributeError as ae:
-                    self.util.msg_log_error(u'unexpected AttributeError: {0}'.format(ae))
-                    continue
-                except:
-                    self.util.msg_log_error(u'unexpected error during request or parsing of response:')
-                    self.util.msg_log_last_exception()
-                    continue
+                    try:
+                        json_txt = response.text.data().decode()
+                        self.util.msg_log_debug(u'resp_msg (decoded):\n{} .......'.format(json_txt[:255]))
+                        result = json.loads(json_txt)
+                        self.process_instances_result(result)
+                    except Exception as e:
+                        # 失敗理由を記録
+                        msg = f"Error parsing JSON from {instances_url}: {e}"
+                        self.util.msg_log_error(msg)
+                        fetch_failures.append(msg)
+                        self.util.msg_log_last_exception()
+                        continue
             
             # カスタムサーバーを追加
             self.add_custom_servers()
@@ -181,7 +181,11 @@ class GeoImportDialogDataProviders(QDialog, FORM_CLASS):
             # サーバーがない場合は警告
             if not self.servers:
                 QApplication.restoreOverrideCursor()
-                self.util.dlg_warning(self.util.tr(u'Failed to load any CKAN instances.'))
+                # どの URL が失敗したのかをユーザーに示す
+                detail = ''
+                if fetch_failures:
+                    detail = '\n\n' + '\n'.join(fetch_failures)
+                self.util.dlg_warning(self.util.tr(u'Failed to load any CKAN instances.') + detail)
                 return
 
             # サーバーリストの表示（両方のソース読み込み後に1回だけ行う）
