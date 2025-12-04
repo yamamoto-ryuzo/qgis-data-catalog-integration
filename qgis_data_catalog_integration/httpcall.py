@@ -42,6 +42,25 @@ class HttpCall:
         self.util = util
         self.reply = None
 
+    # Qt5 / Qt6 の違いで QNetworkReply のエラー定数が名前空間化されている場合があるため
+    # ここで互換性用の定数を解決しておく
+    try:
+        QNR_NO_ERROR = QNetworkReply.NoError
+        QNR_TIMEOUT_ERROR = QNetworkReply.TimeoutError
+        QNR_CONNECTION_REFUSED_ERROR = QNetworkReply.ConnectionRefusedError
+    except AttributeError:
+        # Qt6: QNetworkReply.NetworkError.<Name>
+        try:
+            QNR_NO_ERROR = QNetworkReply.NetworkError.NoError
+            QNR_TIMEOUT_ERROR = QNetworkReply.NetworkError.TimeoutError
+            QNR_CONNECTION_REFUSED_ERROR = QNetworkReply.NetworkError.ConnectionRefusedError
+        except Exception:
+            # 最終フォールバック: 既存属性に頼る（互換性のため）
+            QNR_NO_ERROR = getattr(QNetworkReply, 'NoError', 0)
+            QNR_TIMEOUT_ERROR = getattr(QNetworkReply, 'TimeoutError', 1)
+            QNR_CONNECTION_REFUSED_ERROR = getattr(QNetworkReply, 'ConnectionRefusedError', 2)
+
+    
     def execute_request(self, url, **kwargs):
         """
         Uses QgsNetworkAccessManager and QgsAuthManager.
@@ -84,7 +103,20 @@ class HttpCall:
 
         req = QNetworkRequest()
         req.setUrl(QUrl(url))
-        req.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
+        # FollowRedirectsAttribute は Qt のバージョンで存在しない場合があるため
+        # 存在チェックしてから設定する（存在しなければ無視する）
+        try:
+            attr_ns = getattr(QNetworkRequest, 'Attribute', None)
+            if attr_ns is not None and hasattr(attr_ns, 'FollowRedirectsAttribute'):
+                req.setAttribute(attr_ns.FollowRedirectsAttribute, True)
+            elif hasattr(QNetworkRequest, 'FollowRedirectsAttribute'):
+                req.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
+            else:
+                self.util.msg_log_debug('QNetworkRequest FollowRedirectsAttribute not available; skipping setAttribute')
+        except Exception:
+            # 何らかの予期せぬ問題があればログに残して続行
+            self.util.msg_log_error('error setting FollowRedirectsAttribute on QNetworkRequest')
+            self.util.msg_log_last_exception()
 
         for k, v in headers.items():
             self.util.msg_log_debug("%s: %s" % (k, v))
@@ -226,14 +258,19 @@ class HttpCall:
         self.util.msg_log_debug('------- reply_finished')
         try:
             err = self.reply.error()
-            httpStatus = self.reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
-            httpStatusMessage = self.reply.attribute(QNetworkRequest.HttpReasonPhraseAttribute)
+            # Qt6では QNetworkRequest.Attribute.<Name> へ移動している
+            try:
+                httpStatus = self.reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
+                httpStatusMessage = self.reply.attribute(QNetworkRequest.Attribute.HttpReasonPhraseAttribute)
+            except AttributeError:
+                httpStatus = self.reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+                httpStatusMessage = self.reply.attribute(QNetworkRequest.HttpReasonPhraseAttribute)
             self.http_call_result.status_code = httpStatus
             self.http_call_result.status_message = httpStatusMessage
             for k, v in self.reply.rawHeaderPairs():
                 self.http_call_result.headers[k.data().decode()] = v.data().decode()
                 self.http_call_result.headers[k.data().decode().lower()] = v.data().decode()
-            if err == QNetworkReply.NoError:
+            if err == QNR_NO_ERROR:
                 self.util.msg_log_debug('QNetworkReply.NoError')
                 self.http_call_result.text = self.reply.readAll()
                 self.http_call_result.ok = True
@@ -247,9 +284,9 @@ class HttpCall:
                 )
                 self.http_call_result.reason = msg
                 self.util.msg_log_error(msg)
-                if err == QNetworkReply.TimeoutError:
+                if err == QNR_TIMEOUT_ERROR:
                     self.http_call_result.exception = RequestsExceptionTimeout(msg)
-                if err == QNetworkReply.ConnectionRefusedError:
+                if err == QNR_CONNECTION_REFUSED_ERROR:
                     self.http_call_result.exception = RequestsExceptionConnectionError(msg)
                 else:
                     self.http_call_result.exception = Exception(msg)

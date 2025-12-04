@@ -270,7 +270,12 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
     def select_local_folder(self):
         """Open folder dialog and set selected folder into manual URL field."""
         cache_dir = self.settings.cache_dir if hasattr(self.settings, 'cache_dir') else ''
-        folder = QFileDialog.getExistingDirectory(self, self.util.tr('Select LOCAL folder'), cache_dir, QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks)
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            self.util.tr('Select LOCAL folder'),
+            cache_dir,
+            QFileDialog.Option.ShowDirsOnly | QFileDialog.Option.DontResolveSymlinks
+        )
         if folder and folder != '':
             # set plain path (works with existing detection logic)
             self.IDC_leManualUrl.setText(folder)
@@ -484,7 +489,7 @@ class CKANBrowserDialogDataProviders(QDialog, FORM_CLASS):
 
             def eventFilter(self, obj, event):
                 if obj == widget:
-                    if event.type() == QEvent.MouseButtonRelease:
+                    if event.type() == QEvent.Type.MouseButtonRelease:
                         if obj.rect().contains(event.pos()):
                             self.clicked.emit()
                             # The developer can opt for .emit(obj) to get the object within the slot.

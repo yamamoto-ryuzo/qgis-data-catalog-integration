@@ -78,7 +78,7 @@ class CKANBrowserDialogSettings(QDialog, FORM_CLASS):
             self.main_win,
             self.settings.DLG_CAPTION,
             self.settings.cache_dir,
-            QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
+            QFileDialog.Option.ShowDirsOnly | QFileDialog.Option.DontResolveSymlinks
         )
         if '' == cache_dir:
             self.util.msg_log_debug('no cachedir selected')
@@ -124,7 +124,7 @@ class CKANBrowserDialogSettings(QDialog, FORM_CLASS):
         layout.addWidget(acs)
 
         buttonbox = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
             Qt.Orientation.Horizontal, dlg
         )
 

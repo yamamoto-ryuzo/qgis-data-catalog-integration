@@ -4,7 +4,7 @@
 name=geo_import
 qgisMinimumVersion=3.40
 qgisMaximumVersion=3.99
-version=V2.3.16
+version=V2.3.20
 author=Ryuzo Yamamoto
 email=ryu@yamakun.net
 description=さまざまなデータセットを検索・追加できるQGISプラグインです / A QGIS plugin to search and add various datasets.
