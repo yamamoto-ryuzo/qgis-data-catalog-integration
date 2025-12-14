@@ -272,7 +272,7 @@ class HttpCall:
             for k, v in self.reply.rawHeaderPairs():
                 self.http_call_result.headers[k.data().decode()] = v.data().decode()
                 self.http_call_result.headers[k.data().decode().lower()] = v.data().decode()
-            if err == QNR_NO_ERROR:
+            if err == self.QNR_NO_ERROR:
                 self.util.msg_log_debug('QNetworkReply.NoError')
                 self.http_call_result.text = self.reply.readAll()
                 self.http_call_result.ok = True
@@ -288,7 +288,7 @@ class HttpCall:
                 self.util.msg_log_error(msg)
                 if err == QNR_TIMEOUT_ERROR:
                     self.http_call_result.exception = RequestsExceptionTimeout(msg)
-                if err == QNR_CONNECTION_REFUSED_ERROR:
+                if err == self.QNR_CONNECTION_REFUSED_ERROR:
                     self.http_call_result.exception = RequestsExceptionConnectionError(msg)
                 else:
                     self.http_call_result.exception = Exception(msg)

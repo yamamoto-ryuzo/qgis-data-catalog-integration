@@ -161,19 +161,30 @@ class GeoImportDialogDataProviders(QDialog, FORM_CLASS):
                 if not response.ok:
                     self.util.msg_log_error(u'{}: {} {}'.format(response.status_code, response.status_message, response.reason))
                     continue  # 次のURLを処理
-                
-                    try:
-                        json_txt = response.text.data().decode()
-                        self.util.msg_log_debug(u'resp_msg (decoded):\n{} .......'.format(json_txt[:255]))
-                        result = json.loads(json_txt)
-                        self.process_instances_result(result)
-                    except Exception as e:
-                        # 失敗理由を記録
-                        msg = f"Error parsing JSON from {instances_url}: {e}"
-                        self.util.msg_log_error(msg)
-                        fetch_failures.append(msg)
-                        self.util.msg_log_last_exception()
-                        continue
+
+                try:
+                    # response.text can be a QByteArray, bytes or str depending on Qt/PyQt version
+                    resp_text = response.text
+                    if hasattr(resp_text, 'data'):
+                        try:
+                            json_txt = resp_text.data().decode('utf-8')
+                        except Exception:
+                            json_txt = bytes(resp_text).decode('utf-8', errors='replace')
+                    elif isinstance(resp_text, (bytes, bytearray)):
+                        json_txt = resp_text.decode('utf-8')
+                    else:
+                        json_txt = str(resp_text)
+
+                    self.util.msg_log_debug(u'resp_msg (decoded):\n{} .......'.format(json_txt[:255]))
+                    result = json.loads(json_txt)
+                    self.process_instances_result(result)
+                except Exception as e:
+                    # 失敗理由を記録
+                    msg = f"Error parsing JSON from {instances_url}: {e}"
+                    self.util.msg_log_error(msg)
+                    fetch_failures.append(msg)
+                    self.util.msg_log_last_exception()
+                    continue
             
             # カスタムサーバーを追加
             self.add_custom_servers()
